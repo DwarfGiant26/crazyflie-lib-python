@@ -111,16 +111,16 @@ if __name__ == '__main__':
             cf.commander.send_hover_setpoint(0, 0, 0, 0.3)
             time.sleep(0.1)
 
-        for _ in range(15):
+        """ for _ in range(15):
             cf.commander.send_hover_setpoint(0.6, -0.6, 0, 0.4)
-            time.sleep(0.1)
+            time.sleep(0.1) """
 
         for _ in range(30):
             cf.commander.send_hover_setpoint(0, 0, 50, 0.3)
             time.sleep(0.1)
 
         for _ in range(10):
-            cf.commander.send_hover_setpoint(0, 0, 0, 0.07)
+            cf.commander.send_hover_setpoint(0, 0, 0, 0.05)
             time.sleep(0.1)
 
         # for _ in range(10):
