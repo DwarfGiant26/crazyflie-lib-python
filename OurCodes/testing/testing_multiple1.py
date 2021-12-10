@@ -81,58 +81,59 @@ if __name__ == '__main__':
 
     cflib.crtp.init_drivers()
     with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
-        print("reached sync")
+        with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf2:
+            print("reached sync")
 
-        scf.cf.param.add_update_callback(
-            group="deck", name="bcLighthouse4", cb=param_deck_flow)
-        time.sleep(1)
+            scf.cf.param.add_update_callback(
+                group="deck", name="bcLighthouse4", cb=param_deck_flow)
+            time.sleep(1)
 
-        init_log_history()
+            init_log_history()
 
-        logconf = LogConfig(name='Parameters', period_in_ms=SAMPLE_PERIOD_MS)
-        for param in log_parameters:
-            logconf.add_variable(param[0], param[1])
+            logconf = LogConfig(name='Parameters', period_in_ms=SAMPLE_PERIOD_MS)
+            for param in log_parameters:
+                logconf.add_variable(param[0], param[1])
 
-        scf.cf.log.add_config(logconf)
-        logconf.data_received_cb.add_callback(logconf_callback)
+            scf.cf.log.add_config(logconf)
+            logconf.data_received_cb.add_callback(logconf_callback)
 
-        #if is_deck_attached:
-        logconf.start()
+            #if is_deck_attached:
+            logconf.start()
 
-        cf = scf.cf
+            cf = scf.cf
 
-        cf.param.set_value('kalman.resetEstimation', '1')
-        time.sleep(0.1)
-        cf.param.set_value('kalman.resetEstimation', '0')
-        time.sleep(2)
-        print("set kalman values")
-
-        for y in range(30):
-            cf.commander.send_hover_setpoint(0, 0, 0, 0.3)
+            cf.param.set_value('kalman.resetEstimation', '1')
             time.sleep(0.1)
+            cf.param.set_value('kalman.resetEstimation', '0')
+            time.sleep(2)
+            print("set kalman values")
 
-        """ for _ in range(15):
-            cf.commander.send_hover_setpoint(0.6, -0.6, 0, 0.4)
-            time.sleep(0.1) """
+            for y in range(30):
+                cf.commander.send_hover_setpoint(0, 0, 0, 0.3)
+                time.sleep(0.1)
 
-        for _ in range(30):
-            cf.commander.send_hover_setpoint(0, 0, 50, 0.3)
-            time.sleep(0.1)
+            """ for _ in range(15):
+                cf.commander.send_hover_setpoint(0.6, -0.6, 0, 0.4)
+                time.sleep(0.1) """
 
-        for _ in range(10):
-            cf.commander.send_hover_setpoint(0, 0, 0, 0.02)
-            time.sleep(0.1)
+            for _ in range(30):
+                cf.commander.send_hover_setpoint(0, 0, 50, 0.3)
+                time.sleep(0.1)
 
-        # for _ in range(10):
-        #     cf.commander.send_hover_setpoint(0, 0, 0, 0.1)
-        #     time.sleep(0.1)
+            for _ in range(10):
+                cf.commander.send_hover_setpoint(0, 0, 0, 0.02)
+                time.sleep(0.1)
 
-        # for y in range(10):
-        #     cf.commander.send_hover_setpoint(0, 0, 0, (10 - y) / 25)
-        #     time.sleep(0.1)
+            # for _ in range(10):
+            #     cf.commander.send_hover_setpoint(0, 0, 0, 0.1)
+            #     time.sleep(0.1)
 
-        cf.commander.send_stop_setpoint()
+            # for y in range(10):
+            #     cf.commander.send_hover_setpoint(0, 0, 0, (10 - y) / 25)
+            #     time.sleep(0.1)
 
-        logconf.stop()
+            cf.commander.send_stop_setpoint()
 
-        write_log_history()
+            logconf.stop()
+
+            write_log_history()
