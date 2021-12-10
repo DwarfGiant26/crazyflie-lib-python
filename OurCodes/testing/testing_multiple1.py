@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 
 URI1 = 'radio://0/80/2M/E7E7E7E7E7'
 URI2 = 'radio://0/60/2M/E7E7E7E7E5'
+URI3 = 'radio://0/60/2M/E7E7E7E7E3'
 DEFAULT_HEIGHT = 0.1
 SAMPLE_PERIOD_MS = 10
 
@@ -84,66 +85,78 @@ if __name__ == '__main__':
     with SyncCrazyflie(URI2, cf=Crazyflie(rw_cache='./cache')) as scf:
         print(1)
         with SyncCrazyflie(URI1, cf=Crazyflie(rw_cache='./cache')) as scf2:
-            print("reached sync")
+            with SyncCrazyflie(URI3, cf=Crazyflie(rw_cache='./cache')) as scf3:
 
-            scf.cf.param.add_update_callback(
-                group="deck", name="bcLighthouse4", cb=param_deck_flow)
-            time.sleep(1)
+                print("reached sync")
 
-            init_log_history()
+                scf.cf.param.add_update_callback(
+                    group="deck", name="bcLighthouse4", cb=param_deck_flow)
+                time.sleep(1)
 
-            logconf = LogConfig(name='Parameters', period_in_ms=SAMPLE_PERIOD_MS)
-            for param in log_parameters:
-                logconf.add_variable(param[0], param[1])
+                init_log_history()
 
-            scf.cf.log.add_config(logconf)
-            logconf.data_received_cb.add_callback(logconf_callback)
+                logconf = LogConfig(name='Parameters', period_in_ms=SAMPLE_PERIOD_MS)
+                for param in log_parameters:
+                    logconf.add_variable(param[0], param[1])
 
-            #if is_deck_attached:
-            logconf.start()
+                scf.cf.log.add_config(logconf)
+                logconf.data_received_cb.add_callback(logconf_callback)
 
-            cf = scf.cf
-            cf2 = scf2.cf
+                #if is_deck_attached:
+                logconf.start()
 
-            cf.param.set_value('kalman.resetEstimation', '1')
-            time.sleep(0.1)
-            cf.param.set_value('kalman.resetEstimation', '0')
-            time.sleep(2)
-            cf2.param.set_value('kalman.resetEstimation', '1')
-            time.sleep(0.1)
-            cf2.param.set_value('kalman.resetEstimation', '0')
-            time.sleep(2)
-            print("set kalman values")
+                cf = scf.cf
+                cf2 = scf2.cf
+                cf3 = scf3.cf
 
-            for y in range(30):
-                cf.commander.send_hover_setpoint(0, 0, 0, 0.3)
-                cf2.commander.send_hover_setpoint(0, 0, 0, 0.3)
+                cf.param.set_value('kalman.resetEstimation', '1')
                 time.sleep(0.1)
-
-            """ for _ in range(15):
-                cf.commander.send_hover_setpoint(0.6, -0.6, 0, 0.4)
-                time.sleep(0.1) """
-
-            for _ in range(30):
-                cf.commander.send_hover_setpoint(0, 0, 50, 0.3)
-                cf2.commander.send_hover_setpoint(0, 0, -50, 0.3)
+                cf.param.set_value('kalman.resetEstimation', '0')
+                time.sleep(2)
+                cf2.param.set_value('kalman.resetEstimation', '1')
                 time.sleep(0.1)
-
-            for _ in range(10):
-                cf.commander.send_hover_setpoint(0, 0, 0, 0.02)
-                cf2.commander.send_hover_setpoint(0, 0, 0, 0.02)
+                cf2.param.set_value('kalman.resetEstimation', '0')
+                time.sleep(2)
+                cf3.param.set_value('kalman.resetEstimation', '1')
                 time.sleep(0.1)
+                cf3.param.set_value('kalman.resetEstimation', '0')
+                time.sleep(2)
+                print("set kalman values")
 
-            # for _ in range(10):
-            #     cf.commander.send_hover_setpoint(0, 0, 0, 0.1)
-            #     time.sleep(0.1)
+                for y in range(30):
+                    cf.commander.send_hover_setpoint(0, 0, 0, 0.3)
+                    cf2.commander.send_hover_setpoint(0, 0, 0, 0.3)
+                    cf3.commander.send_hover_setpoint(0, 0, 0, 0.3)
+                    time.sleep(0.1)
 
-            # for y in range(10):
-            #     cf.commander.send_hover_setpoint(0, 0, 0, (10 - y) / 25)
-            #     time.sleep(0.1)
+                """ for _ in range(15):
+                    cf.commander.send_hover_setpoint(0.6, -0.6, 0, 0.4)
+                    time.sleep(0.1) """
 
-            cf.commander.send_stop_setpoint()
+                for _ in range(30):
+                    cf.commander.send_hover_setpoint(0, 0, 50, 0.3)
+                    cf2.commander.send_hover_setpoint(0, 0, -50, 0.3)
+                    cf3.commander.send_hover_setpoint(0, 0, 50, 0.3)
+                    time.sleep(0.1)
 
-            logconf.stop()
+                for _ in range(10):
+                    cf.commander.send_hover_setpoint(0, 0, 0, 0.02)
+                    cf2.commander.send_hover_setpoint(0, 0, 0, 0.02)
+                    cf3.commander.send_hover_setpoint(0, 0, 0, 0.02)
+                    time.sleep(0.1)
 
-            write_log_history()
+                # for _ in range(10):
+                #     cf.commander.send_hover_setpoint(0, 0, 0, 0.1)
+                #     time.sleep(0.1)
+
+                # for y in range(10):
+                #     cf.commander.send_hover_setpoint(0, 0, 0, (10 - y) / 25)
+                #     time.sleep(0.1)
+
+                cf.commander.send_stop_setpoint()
+                cf2.commander.send_stop_setpoint()
+                cf3.commander.send_stop_setpoint()
+
+                logconf.stop()
+
+                write_log_history()
