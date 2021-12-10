@@ -11,7 +11,8 @@ from cflib.crazyflie.log import LogConfig
 
 import matplotlib.pyplot as plt
 
-URI = 'radio://0/80/2M/E7E7E7E7E7'
+URI1 = 'radio://0/80/2M/E7E7E7E7E7'
+URI2 = 'radio://0/60/2M/E7E7E7E7E5'
 DEFAULT_HEIGHT = 0.1
 SAMPLE_PERIOD_MS = 10
 
@@ -80,8 +81,9 @@ def param_deck_flow(name, value_str):
 if __name__ == '__main__':
 
     cflib.crtp.init_drivers()
-    with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
-        with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf2:
+    with SyncCrazyflie(URI2, cf=Crazyflie(rw_cache='./cache')) as scf:
+        print(1)
+        with SyncCrazyflie(URI1, cf=Crazyflie(rw_cache='./cache')) as scf2:
             print("reached sync")
 
             scf.cf.param.add_update_callback(
@@ -101,15 +103,21 @@ if __name__ == '__main__':
             logconf.start()
 
             cf = scf.cf
+            cf2 = scf2.cf
 
             cf.param.set_value('kalman.resetEstimation', '1')
             time.sleep(0.1)
             cf.param.set_value('kalman.resetEstimation', '0')
             time.sleep(2)
+            cf2.param.set_value('kalman.resetEstimation', '1')
+            time.sleep(0.1)
+            cf2.param.set_value('kalman.resetEstimation', '0')
+            time.sleep(2)
             print("set kalman values")
 
             for y in range(30):
                 cf.commander.send_hover_setpoint(0, 0, 0, 0.3)
+                cf2.commander.send_hover_setpoint(0, 0, 0, 0.3)
                 time.sleep(0.1)
 
             """ for _ in range(15):
@@ -118,10 +126,12 @@ if __name__ == '__main__':
 
             for _ in range(30):
                 cf.commander.send_hover_setpoint(0, 0, 50, 0.3)
+                cf2.commander.send_hover_setpoint(0, 0, -50, 0.3)
                 time.sleep(0.1)
 
             for _ in range(10):
                 cf.commander.send_hover_setpoint(0, 0, 0, 0.02)
+                cf2.commander.send_hover_setpoint(0, 0, 0, 0.02)
                 time.sleep(0.1)
 
             # for _ in range(10):
