@@ -11,7 +11,7 @@ from cflib.crazyflie.log import LogConfig
 
 import matplotlib.pyplot as plt
 
-URI1 = 'radio://0/80/2M/E7E7E7E7E7'
+URI1 = 'radio://0/60/2M/E7E7E7E7E7'
 URI2 = 'radio://0/60/2M/E7E7E7E7E5'
 URI3 = 'radio://0/60/2M/E7E7E7E7E3'
 DEFAULT_HEIGHT = 0.1
@@ -61,9 +61,8 @@ def logconf_callback(timestamp, data, logconf):
     global log_history, log_cycles
     data['time.ms'] = timestamp
     # Convert FP16 to FP32
-    data['pm.vbat'] = 1
-    """ np.frombuffer(struct.pack(
-        "H", int(hex(data['pm.vbat']), 16)), dtype=np.float16)[0] """
+    data['pm.vbat'] = np.frombuffer(struct.pack(
+        "H", int(hex(data['pm.vbat']), 16)), dtype=np.float16)[0]
     log_history.append(data)
     log_cycles += 1
 
@@ -130,19 +129,20 @@ if __name__ == '__main__':
                     time.sleep(0.1)
 
                 """ for _ in range(15):
+
                     cf.commander.send_hover_setpoint(0.6, -0.6, 0, 0.4)
                     time.sleep(0.1) """
 
                 for _ in range(30):
-                    cf.commander.send_hover_setpoint(0, 0, 50, 0.3)
-                    cf2.commander.send_hover_setpoint(0, 0, -50, 0.3)
-                    cf3.commander.send_hover_setpoint(0, 0, 50, 0.3)
+                    cf.commander.send_hover_setpoint(0.33, 0, 0, 0.3)
+                    cf2.commander.send_hover_setpoint(0.33, 0, 0, 0.3)
+                    cf3.commander.send_hover_setpoint(0.33, 0, 0, 0.3)
                     time.sleep(0.1)
 
-                for _ in range(10):
-                    cf.commander.send_hover_setpoint(0, 0, 0, 0.02)
-                    cf2.commander.send_hover_setpoint(0, 0, 0, 0.02)
-                    cf3.commander.send_hover_setpoint(0, 0, 0, 0.02)
+                for _ in range(30):
+                    cf.commander.send_hover_setpoint(-0.33, 0, 0, 0.02)
+                    cf2.commander.send_hover_setpoint(-0.33, 0, 0, 0.02)
+                    cf3.commander.send_hover_setpoint(-0.33, 0, 0, 0.02)
                     time.sleep(0.1)
 
                 # for _ in range(10):
