@@ -11,7 +11,7 @@ from cflib.crazyflie.log import LogConfig
 
 import matplotlib.pyplot as plt
 
-URI = 'radio://0/80/2M/E7E7E7E7E7'
+URI = 'radio://0/60/2M/E7E7E7E7E3'
 DEFAULT_HEIGHT = 0.1
 SAMPLE_PERIOD_MS = 10
 
@@ -59,8 +59,7 @@ def logconf_callback(timestamp, data, logconf):
     global log_history, log_cycles
     data['time.ms'] = timestamp
     # Convert FP16 to FP32
-    data['pm.vbat'] = 1
-    """ np.frombuffer(struct.pack(
+    """ data['pm.vbat'] = np.frombuffer(struct.pack(
         "H", int(hex(data['pm.vbat']), 16)), dtype=np.float16)[0] """
     log_history.append(data)
     log_cycles += 1
@@ -111,7 +110,7 @@ if __name__ == '__main__':
             cf.commander.send_hover_setpoint(0, 0, 0, y / 25)
             time.sleep(0.1)
 
-        for _ in range(20):
+        """ for _ in range(20):
             cf.commander.send_hover_setpoint(0, 0, 0, 0.4)
             time.sleep(0.1)
 
@@ -129,7 +128,7 @@ if __name__ == '__main__':
 
         for y in range(10):
             cf.commander.send_hover_setpoint(0, 0, 0, (10 - y) / 25)
-            time.sleep(0.1)
+            time.sleep(0.1) """
 
         cf.commander.send_stop_setpoint()
 
