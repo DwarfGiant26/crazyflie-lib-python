@@ -11,7 +11,7 @@ from cflib.crazyflie.log import LogConfig
 
 import matplotlib.pyplot as plt
 
-URI = 'radio://0/80/2M/E7E7E7E7E7'
+URI = 'radio://0/60/2M/E7E7E7E7E7'
 DEFAULT_HEIGHT = 0.1
 SAMPLE_PERIOD_MS = 10
 

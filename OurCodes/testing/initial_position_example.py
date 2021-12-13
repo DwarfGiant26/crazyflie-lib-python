@@ -45,15 +45,15 @@ from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from cflib.crazyflie.syncLogger import SyncLogger
 
 # URI to the Crazyflie to connect to
-uri = 'radio://0/60/2M/E7E7E7E7E5'
+uri = 'radio://0/60/2M/E7E7E7E7E3'
 
 # Change the sequence according to your setup
 #             x    y    z
 sequence = [
     (0, 0, 0.3),
     (-0.3, 0, 0.4),
-    # (0, 0, 0.3),
-    # (0, 0, 0.2),
+    (0, 0.4, 0.3),
+    (0, 0, 0.2),
 ]
 
 
@@ -151,6 +151,7 @@ if __name__ == '__main__':
     # 270: negative Y direction
 
     with SyncCrazyflie(uri, cf=Crazyflie(rw_cache='./cache')) as scf:
+        # Set initial position is for log entries :)
         set_initial_position(scf, initial_x, initial_y, initial_z, initial_yaw)
         reset_estimator(scf)
         run_sequence(scf, sequence,

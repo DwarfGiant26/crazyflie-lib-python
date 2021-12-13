@@ -45,16 +45,34 @@ from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from cflib.crazyflie.syncLogger import SyncLogger
 
 # URI to the Crazyflie to connect to
-uri = 'radio://0/60/2M/E7E7E7E7E5'
+URI1 = 'radio://0/60/2M/E7E7E7E7E7'
+URI2 = 'radio://0/60/2M/E7E7E7E7E5'
+URI3 = 'radio://0/60/2M/E7E7E7E7E3'
 
 # Change the sequence according to your setup
 #             x    y    z
-sequence = [
+sequence1 = [
     (0, 0, 0.3),
-    (-0.3, 0, 0.4),
-    # (0, 0, 0.3),
-    # (0, 0, 0.2),
+    (0, 0, 0.1),
+    # (0, 0.4, 0.3),
+    # (0, 0, 0.1),
 ]
+
+sequence2 = [
+    (0, 0, 0.3),
+    (0, 0, 0.1),
+    # (0, 0.4, 0.3),
+    # (0, 0, 0.1),
+]
+
+sequence3 = [
+    (0, 0, 0.3),
+    (0, 0, 0.1),
+    # (0, 0.4, 0.3),
+    # (0, 0, 0.1),
+]
+
+sequence_ls = [sequence1, sequence2, sequence3]
 
 
 def wait_for_position_estimator(scf):
@@ -116,18 +134,27 @@ def reset_estimator(scf):
     wait_for_position_estimator(cf)
 
 
-def run_sequence(scf, sequence, base_x, base_y, base_z, yaw):
-    cf = scf.cf
+def run_sequence(scf, scf2 scf3, sequence_ls, initial_drone_pos_ls):
+    cf1 = scf.cf
+    cf2 = scf2.cf
+    cf3 = scf3.cf
 
-    for position in sequence:
-        print('Setting position {}'.format(position))
+    cf_ls = [cf1, cf2, cf3]
 
-        x = position[0] + base_x
-        y = position[1] + base_y
-        z = position[2] + base_z
+    for i in range(sequence1):
+        for _ in range(30):
+            for j,cf in enumerate(cf_ls):
 
-        for i in range(30):
-            cf.commander.send_position_setpoint(x, y, z, yaw)
+                x = sequence_ls[j][i][0] + initial_drone_pos_ls[j][0]
+                y = sequence_ls[j][i][1] + initial_drone_pos_ls[j][1]
+                z = sequence_ls[j][i][2] + initial_drone_pos_ls[j][2]
+                yaw = initial_drone_pos_ls[j][3]
+
+        # for position in sequence1:
+        #     print('Setting position {}'.format(position))
+            
+                cf.commander.send_position_setpoint(x, y, z, yaw)
+            
             time.sleep(0.1)
 
     cf.commander.send_stop_setpoint()
@@ -141,17 +168,33 @@ if __name__ == '__main__':
 
     # Set these to the position and yaw based on how your Crazyflie is placed
     # on the floor
-    initial_x = 0.17
-    initial_y = -0.38
-    initial_z = 0.01
-    initial_yaw = -30.49  # In degrees
+    # INITIAL OF DRONE 1
+    initial_drone1 = (0, 0, 0, 0)
+    # initial_x = 0.2
+    # initial_y = 0.1
+    # initial_z = 0
+    # initial_yaw = 1.07 # In degrees
+
+    # INITIAL OF DRONE 2
+    initial_drone2 = (0, 0, 0, 0)
+
+    # INITIAL OF DRONE 3
+    initial_drone3 = (0, 0, 0, 0)
+
+    initial_drone_pos_ls = [initial_drone1, initial_drone2, initial_drone3]
+
     # 0: positive X direction
     # 90: positive Y direction
     # 180: negative X direction
     # 270: negative Y direction
 
-    with SyncCrazyflie(uri, cf=Crazyflie(rw_cache='./cache')) as scf:
-        set_initial_position(scf, initial_x, initial_y, initial_z, initial_yaw)
-        reset_estimator(scf)
-        run_sequence(scf, sequence,
-                     initial_x, initial_y, initial_z, initial_yaw)
+    with SyncCrazyflie(URI1, cf=Crazyflie(rw_cache='./cache')) as scf:
+        with SyncCrazyflie(URI2, cf=Crazyflie(rw_cache='./cache')) as scf2:
+            with SyncCrazyflie(URI3, cf=Crazyflie(rw_cache='./cache')) as scf3:
+                # LOGGING DATA
+                initial_pos1 = set_initial_position(scf, initial_drone_pos_ls[0][0], initial_drone_pos_ls[0][1], initial_drone_pos_ls[0][2], initial_drone_pos_ls[0][3])
+                initial_pos2 = set_initial_position(scf, initial_drone_pos_ls[1][0], initial_drone_pos_ls[1][1], initial_drone_pos_ls[1][2], initial_drone_pos_ls[1][3])
+                initial_pos3 = set_initial_position(scf, initial_drone_pos_ls[2][0], initial_drone_pos_ls[2][1], initial_drone_pos_ls[2][2], initial_drone_pos_ls[2][3])
+                
+                reset_estimator(scf)
+                run_sequence(scf, scf2, scf3, sequence_ls, initial_drone_pos_ls)
