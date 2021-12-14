@@ -146,9 +146,9 @@ def run_sequence(scf, scf2, scf3, sequence_ls, initial_drone_pos_ls):
         for _ in range(30):
             for j,cf in enumerate(cf_ls):
 
-                x = sequence_ls[j][i][0] - initial_drone_pos_ls[j][0]
-                y = sequence_ls[j][i][1] - initial_drone_pos_ls[j][1]
-                z = sequence_ls[j][i][2] - initial_drone_pos_ls[j][2]
+                x = sequence_ls[j][i][0] + initial_drone_pos_ls[j][0]
+                y = sequence_ls[j][i][1] + initial_drone_pos_ls[j][1]
+                z = sequence_ls[j][i][2] + initial_drone_pos_ls[j][2]
                 yaw = initial_drone_pos_ls[j][3]
 
         # for position in sequence1:
@@ -171,13 +171,13 @@ if __name__ == '__main__':
     # on the floor
     # (initial x, initial y, initial z, inital yaw in degrees)
     # INITIAL OF DRONE 1
-    initial_drone1 = (0, -0.2, 0, 0)
+    initial_drone1 = (0, 0, 0, 0)
 
     # INITIAL OF DRONE 2
-    initial_drone2 = (0, -0.2, 0, 0)
+    initial_drone2 = (0, 0, 0, 0)
 
     # INITIAL OF DRONE 3
-    initial_drone3 = (0, -0.2, 0, 0)
+    initial_drone3 = (0,0, 0, 0)
 
     initial_drone_pos_ls = [initial_drone1, initial_drone2, initial_drone3]
 
