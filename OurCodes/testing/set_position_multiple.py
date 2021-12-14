@@ -50,24 +50,25 @@ URI2 = 'radio://0/60/2M/E7E7E7E7E5'
 URI3 = 'radio://0/60/2M/E7E7E7E7E3'
 
 # Change the sequence according to your setup
+# THESE ARE THE COORDINATES OF TEH BUILDING IN REFERENC TO A SINGLE ORIGIN POSITION SHARED BY ALL 3 DRONES :D
 #             x    y    z
 sequence1 = [
-    (0, 0, 0.3),
-    (0, 0, 0.1),
+    (0, 0.2, 0.4),
+    (0, 0.2, 0.1),
     # (0, 0.4, 0.3),
     # (0, 0, 0.1),
 ]
 
 sequence2 = [
-    (0, 0, 0.3),
-    (0, 0, 0.1),
+    (0, 0.2, 0.3),
+    (0, 0.2, 0.1),
     # (0, 0.4, 0.3),
     # (0, 0, 0.1),
 ]
 
 sequence3 = [
-    (0, 0, 0.3),
-    (0, 0, 0.1),
+    (0, 0.2, 0.2),
+    (0, 0.2, 0.1),
     # (0, 0.4, 0.3),
     # (0, 0, 0.1),
 ]
@@ -134,20 +135,20 @@ def reset_estimator(scf):
     wait_for_position_estimator(cf)
 
 
-def run_sequence(scf, scf2 scf3, sequence_ls, initial_drone_pos_ls):
+def run_sequence(scf, scf2, scf3, sequence_ls, initial_drone_pos_ls):
     cf1 = scf.cf
     cf2 = scf2.cf
     cf3 = scf3.cf
 
     cf_ls = [cf1, cf2, cf3]
 
-    for i in range(sequence1):
+    for i in range(len(sequence1)):
         for _ in range(30):
             for j,cf in enumerate(cf_ls):
 
-                x = sequence_ls[j][i][0] + initial_drone_pos_ls[j][0]
-                y = sequence_ls[j][i][1] + initial_drone_pos_ls[j][1]
-                z = sequence_ls[j][i][2] + initial_drone_pos_ls[j][2]
+                x = sequence_ls[j][i][0] - initial_drone_pos_ls[j][0]
+                y = sequence_ls[j][i][1] - initial_drone_pos_ls[j][1]
+                z = sequence_ls[j][i][2] - initial_drone_pos_ls[j][2]
                 yaw = initial_drone_pos_ls[j][3]
 
         # for position in sequence1:
@@ -168,18 +169,15 @@ if __name__ == '__main__':
 
     # Set these to the position and yaw based on how your Crazyflie is placed
     # on the floor
+    # (initial x, initial y, initial z, inital yaw in degrees)
     # INITIAL OF DRONE 1
-    initial_drone1 = (0, 0, 0, 0)
-    # initial_x = 0.2
-    # initial_y = 0.1
-    # initial_z = 0
-    # initial_yaw = 1.07 # In degrees
+    initial_drone1 = (0, -0.2, 0, 0)
 
     # INITIAL OF DRONE 2
-    initial_drone2 = (0, 0, 0, 0)
+    initial_drone2 = (0, -0.2, 0, 0)
 
     # INITIAL OF DRONE 3
-    initial_drone3 = (0, 0, 0, 0)
+    initial_drone3 = (0, -0.2, 0, 0)
 
     initial_drone_pos_ls = [initial_drone1, initial_drone2, initial_drone3]
 
@@ -193,8 +191,10 @@ if __name__ == '__main__':
             with SyncCrazyflie(URI3, cf=Crazyflie(rw_cache='./cache')) as scf3:
                 # LOGGING DATA
                 initial_pos1 = set_initial_position(scf, initial_drone_pos_ls[0][0], initial_drone_pos_ls[0][1], initial_drone_pos_ls[0][2], initial_drone_pos_ls[0][3])
-                initial_pos2 = set_initial_position(scf, initial_drone_pos_ls[1][0], initial_drone_pos_ls[1][1], initial_drone_pos_ls[1][2], initial_drone_pos_ls[1][3])
-                initial_pos3 = set_initial_position(scf, initial_drone_pos_ls[2][0], initial_drone_pos_ls[2][1], initial_drone_pos_ls[2][2], initial_drone_pos_ls[2][3])
+                initial_pos2 = set_initial_position(scf2, initial_drone_pos_ls[1][0], initial_drone_pos_ls[1][1], initial_drone_pos_ls[1][2], initial_drone_pos_ls[1][3])
+                initial_pos3 = set_initial_position(scf3, initial_drone_pos_ls[2][0], initial_drone_pos_ls[2][1], initial_drone_pos_ls[2][2], initial_drone_pos_ls[2][3])
                 
                 reset_estimator(scf)
+                reset_estimator(scf2)
+                reset_estimator(scf3)
                 run_sequence(scf, scf2, scf3, sequence_ls, initial_drone_pos_ls)

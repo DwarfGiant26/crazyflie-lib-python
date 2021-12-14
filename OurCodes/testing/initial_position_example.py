@@ -50,10 +50,14 @@ uri = 'radio://0/60/2M/E7E7E7E7E3'
 # Change the sequence according to your setup
 #             x    y    z
 sequence = [
-    (0, 0, 0.3),
-    (-0.3, 0, 0.4),
-    (0, 0.4, 0.3),
-    (0, 0, 0.2),
+    # Sequence is a list of coordinates
+    (-0.5, -0.5, 0.2),
+    # (0.5, 0, 0.3),
+    # (0, -0.5, 0.3),
+    # (-0.5, 0, 0.3),
+    # (0, -0.5, 0.3),
+    (-0.3, -0.3, 0.2),
+    (0, 0, 0.1),
 ]
 
 
@@ -121,6 +125,8 @@ def run_sequence(scf, sequence, base_x, base_y, base_z, yaw):
 
     for position in sequence:
         print('Setting position {}'.format(position))
+        # These coordinates provide the new coordinates. 
+        # We should just make a list of coordinates and get the program to iterate through that. 
 
         x = position[0] + base_x
         y = position[1] + base_y
@@ -141,10 +147,12 @@ if __name__ == '__main__':
 
     # Set these to the position and yaw based on how your Crazyflie is placed
     # on the floor
-    initial_x = 0.17
-    initial_y = -0.38
-    initial_z = 0.01
-    initial_yaw = -30.49  # In degrees
+    # NO
+    # MAKE THESE 0 SO THE DRONE FLIES TO COORDINATES MAPPED BY THE LIGHTHOUSE LIKE IT SHOULD
+    initial_x = 0
+    initial_y = 0
+    initial_z = 0
+    initial_yaw = 0  # In degrees
     # 0: positive X direction
     # 90: positive Y direction
     # 180: negative X direction
