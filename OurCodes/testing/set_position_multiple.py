@@ -49,6 +49,16 @@ URI1 = 'radio://0/60/2M/E7E7E7E7E7'
 URI2 = 'radio://0/60/2M/E7E7E7E7E5'
 URI3 = 'radio://0/60/2M/E7E7E7E7E3'
 
+log_parameters = [
+    ('stateEstimate.x', 'float'),
+    ('stateEstimate.y', 'float'),
+    ('stateEstimate.z', 'float'),
+    ('stabilizer.roll', 'float'),
+    ('stabilizer.pitch', 'float'),
+    ('stabilizer.yaw', 'float'),
+    ('pm.vbat', 'FP16')
+]
+
 # Change the sequence according to your setup
 # THESE ARE THE COORDINATES OF TEH BUILDING IN REFERENC TO A SINGLE ORIGIN POSITION SHARED BY ALL 3 DRONES :D
 #             x    y    z
@@ -75,6 +85,49 @@ sequence3 = [
 
 sequence_ls = [sequence1, sequence2, sequence3]
 
+def logconf_callback_1(timestamp, data, logconf):
+    global log_history, log_cycles
+    data['time.ms'] = timestamp
+    # Convert FP16 to FP32
+    
+    log_history[0].append(data)
+    log_cycles += 1
+
+def logconf_callback_2(timestamp, data, logconf):
+    global log_history, log_cycles
+    data['time.ms'] = timestamp
+    # Convert FP16 to FP32
+    
+    log_history[1].append(data)
+    log_cycles += 1
+
+def logconf_callback_3(timestamp, data, logconf):
+    global log_history, log_cycles
+    data['time.ms'] = timestamp
+    # Convert FP16 to FP32
+    
+    log_history[2].append(data)
+    log_cycles += 1
+
+def param_deck_flow(name, value_str):
+    value = int(value_str)
+    global is_deck_attached
+    if value:
+        is_deck_attached = True
+        print('Deck is attached!')
+    else:
+        is_deck_attached = False
+        print('Deck is NOT attached!')
+
+def write_log_history():
+    for i in range(3):
+        with open(f'multiple1_drone_{i}.csv', mode='w') as csv_file:
+            fieldnames = ['time.ms'] + [param[0] for param in log_parameters]
+            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+
+            writer.writeheader()
+            for item in log_history[i]:
+                writer.writerow(item)
 
 def wait_for_position_estimator(scf):
     print('Waiting for estimator to find position...')
@@ -197,4 +250,45 @@ if __name__ == '__main__':
                 reset_estimator(scf)
                 reset_estimator(scf2)
                 reset_estimator(scf3)
+
+                scf.cf.param.add_update_callback(
+                    group="deck", name="bcLighthouse4", cb=param_deck_flow)
+                time.sleep(1)
+
+                scf2.cf.param.add_update_callback(
+                    group="deck", name="bcLighthouse4", cb=param_deck_flow)
+                time.sleep(1)
+
+                scf3.cf.param.add_update_callback(
+                    group="deck", name="bcLighthouse4", cb=param_deck_flow)
+                time.sleep(1)
+
+
+                logconf1 = LogConfig(name='Parameters', period_in_ms=SAMPLE_PERIOD_MS)
+                for param in log_parameters:
+                    logconf1.add_variable(param[0], param[1])
+                logconf2 = LogConfig(name='Parameters', period_in_ms=SAMPLE_PERIOD_MS)
+                for param in log_parameters:
+                    logconf2.add_variable(param[0], param[1])
+                logconf3 = LogConfig(name='Parameters', period_in_ms=SAMPLE_PERIOD_MS)
+                for param in log_parameters:
+                    logconf3.add_variable(param[0], param[1])
+
+                scf.cf.log.add_config(logconf1)
+                scf2.cf.log.add_config(logconf2)
+                scf3.cf.log.add_config(logconf3)
+                logconf1.data_received_cb.add_callback(logconf_callback_1)
+                logconf2.data_received_cb.add_callback(logconf_callback_2)
+                logconf3.data_received_cb.add_callback(logconf_callback_3)
+
+                #if is_deck_attached:
+                logconf1.start()
+                logconf2.start()
+                logconf3.start()
+
                 run_sequence(scf, scf2, scf3, sequence_ls, initial_drone_pos_ls)
+
+                write_log_history()
+                logconf1.stop()
+                logconf2.stop()
+                logconf3.stop()
