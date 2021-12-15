@@ -106,15 +106,15 @@ def logconf_callback_2(timestamp, data, logconf):
     # Convert FP16 to FP32
     
     log_history[1].append(data)
-    # log_cycles += 1
+    log_cycles += 1
 
 def logconf_callback_3(timestamp, data, logconf):
     global log_history, log_cycles
-    data['time.ms'] = timestamp
+    data['time.ms'] = timestamp 
     # Convert FP16 to FP32
     
     log_history[2].append(data)
-    # log_cycles += 1
+    log_cycles += 1
 
 def param_deck_flow(name, value_str):
     value = int(value_str)
@@ -296,7 +296,8 @@ if __name__ == '__main__':
                 logconf3.start()
 
                 run_sequence(scf, scf2, scf3, sequence_ls, initial_drone_pos_ls)
-
+                
+                #should be after stop()
                 write_log_history()
                 logconf1.stop()
                 logconf2.stop()
