@@ -37,6 +37,7 @@ initial position of the kalman estimator.
 """
 import math
 import time
+import csv
 
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
@@ -48,6 +49,8 @@ from cflib.crazyflie.syncLogger import SyncLogger
 URI1 = 'radio://0/60/2M/E7E7E7E7E7'
 URI2 = 'radio://0/60/2M/E7E7E7E7E5'
 URI3 = 'radio://0/60/2M/E7E7E7E7E3'
+DEFAULT_HEIGHT = 0.1
+SAMPLE_PERIOD_MS = 10
 
 log_parameters = [
     ('stateEstimate.x', 'float'),
@@ -59,26 +62,30 @@ log_parameters = [
     ('pm.vbat', 'FP16')
 ]
 
+log_history = [[],[],[]]
+log_cycles = 0
+
+
 # Change the sequence according to your setup
 # THESE ARE THE COORDINATES OF TEH BUILDING IN REFERENC TO A SINGLE ORIGIN POSITION SHARED BY ALL 3 DRONES :D
 #             x    y    z
 sequence1 = [
-    (0, 0.2, 0.4),
-    (0, 0.2, 0.1),
+    (-0.5, -0.5, 0.2),
+    (-0.5, -0.5, 0.1),
     # (0, 0.4, 0.3),
     # (0, 0, 0.1),
 ]
 
 sequence2 = [
-    (0, 0.2, 0.3),
-    (0, 0.2, 0.1),
+    (0.4, 0.3, 0.3),
+    (0.4, 0.3, 0.1),
     # (0, 0.4, 0.3),
     # (0, 0, 0.1),
 ]
 
 sequence3 = [
-    (0, 0.2, 0.2),
-    (0, 0.2, 0.1),
+    (-1.2, 0.4, 0.2),
+    (-1.2, 0.4, 0.1),
     # (0, 0.4, 0.3),
     # (0, 0, 0.1),
 ]
@@ -99,7 +106,7 @@ def logconf_callback_2(timestamp, data, logconf):
     # Convert FP16 to FP32
     
     log_history[1].append(data)
-    log_cycles += 1
+    # log_cycles += 1
 
 def logconf_callback_3(timestamp, data, logconf):
     global log_history, log_cycles
@@ -107,7 +114,7 @@ def logconf_callback_3(timestamp, data, logconf):
     # Convert FP16 to FP32
     
     log_history[2].append(data)
-    log_cycles += 1
+    # log_cycles += 1
 
 def param_deck_flow(name, value_str):
     value = int(value_str)
@@ -211,7 +218,9 @@ def run_sequence(scf, scf2, scf3, sequence_ls, initial_drone_pos_ls):
             
             time.sleep(0.1)
 
-    cf.commander.send_stop_setpoint()
+    cf1.commander.send_stop_setpoint()
+    cf2.commander.send_stop_setpoint()
+    cf3.commander.send_stop_setpoint()
     # Make sure that the last packet leaves before the link is closed
     # since the message queue is not flushed before closing
     time.sleep(0.1)
