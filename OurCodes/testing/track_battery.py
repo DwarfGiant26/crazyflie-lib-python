@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 URI = 'radio://0/60/2M/E7E7E7E7E7'
 DEFAULT_HEIGHT = 0.1
-SAMPLE_PERIOD_MS = 10
+SAMPLE_PERIOD_MS = 1000
 
 is_deck_attached = False
 
@@ -102,7 +102,7 @@ if __name__ == '__main__':
         cf = scf.cf
 
         for y in range(30):
-            time.sleep(0.1)
+            time.sleep(0.9)
 
         # cf.param.set_value('kalman.resetEstimation', '1')
         # time.sleep(0.1)
