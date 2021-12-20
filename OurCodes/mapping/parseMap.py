@@ -9,7 +9,7 @@ import csv
 file = open('BuildingPosition.csv')
 csvreader = csv.reader(file)
 rows = []
-for row in csvreader:
+for row in csvreader[1:]:
         rows.append(row)
 file.close()
 
