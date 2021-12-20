@@ -11,9 +11,11 @@ from cflib.crazyflie.log import LogConfig
 
 import matplotlib.pyplot as plt
 
-URI = 'radio://0/60/2M/E7E7E7E7E7'
+# Takes around 15 minutes to charge from 3.9 to 4.2. approximately 20-25 minutets for 3.7-4.2?
+
+URI = 'radio://0/60/2M/E7E7E7E7E5'
 DEFAULT_HEIGHT = 0.1
-SAMPLE_PERIOD_MS = 10
+SAMPLE_PERIOD_MS = 2500
 
 is_deck_attached = False
 
@@ -59,11 +61,15 @@ def logconf_callback(timestamp, data, logconf):
     global log_history, log_cycles
     data['time.ms'] = timestamp
     # Convert FP16 to FP32
-    data['pm.vbat'] = 1
-    """ np.frombuffer(struct.pack(
-        "H", int(hex(data['pm.vbat']), 16)), dtype=np.float16)[0] """
+    # data['pm.vbat'] = 1
+    # """ np.frombuffer(struct.pack(
+    #     "H", int(hex(data['pm.vbat']), 16)), dtype=np.float16)[0] """
     log_history.append(data)
     log_cycles += 1
+
+def full_battery(data):
+    if data['pm.vbat'] == 4.18:
+        exit()
 
 
 def param_deck_flow(name, value_str):
@@ -101,8 +107,8 @@ if __name__ == '__main__':
 
         cf = scf.cf
 
-        for y in range(30):
-            time.sleep(0.1)
+        for y in range(40):
+            time.sleep(60)
 
         # cf.param.set_value('kalman.resetEstimation', '1')
         # time.sleep(0.1)
