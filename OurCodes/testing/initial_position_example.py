@@ -56,7 +56,7 @@ from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from cflib.crazyflie.syncLogger import SyncLogger
 
 # URI to the Crazyflie to connect to
-uri = 'radio://0/60/2M/E7E7E7E7E7'
+uri = 'radio://0/60/2M/E7E7E7E7E3'
 
 DEFAULT_HEIGHT = 0.1
 SAMPLE_PERIOD_MS = 10
@@ -122,13 +122,16 @@ def param_deck_flow(name, value_str):
 #             x    y    z
 sequence = [
     # Sequence is a list of coordinates
-    (-0.5, -0.5, 0.2),
+    (0.39, -0.99, 1.2),
+    (-1.03, -0.57, 1.0),
+    (-1.03, -0.57, 0.5),
+    (-1.03, -0.57, 0.2),
     # (0.5, 0, 0.3),
     # (0, -0.5, 0.3),
     # (-0.5, 0, 0.3),
     # (0, -0.5, 0.3),
-    (-0.3, -0.3, 0.2),
-    (0, 0, 0.1),
+    # (-0.3, -0.3, 0.2),
+    # (0, 0, 0.1),
 ]
 
 

@@ -38,6 +38,7 @@ initial position of the kalman estimator.
 import math
 import time
 import csv
+import logging
 
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
@@ -65,27 +66,32 @@ log_parameters = [
 log_history = [[],[],[]]
 log_cycles = 0
 
+logging.basicConfig(level=logging.ERROR)
+
 
 # Change the sequence according to your setup
 # THESE ARE THE COORDINATES OF TEH BUILDING IN REFERENC TO A SINGLE ORIGIN POSITION SHARED BY ALL 3 DRONES :D
 #             x    y    z
 sequence1 = [
     (-0.5, -0.5, 0.2),
-    (-0.5, -0.5, 0.1),
+    (0.4, 0.4, 0.1),
+    # (-0.5, -0.5, 0.2),
     # (0, 0.4, 0.3),
     # (0, 0, 0.1),
 ]
 
 sequence2 = [
-    (0.4, 0.3, 0.3),
-    (0.4, 0.3, 0.1),
+    (0.4, 0.3, 0.2),
+    (-1.1, 0.4, 0.1),
+    # (0.4, 0.3, 0.3),
     # (0, 0.4, 0.3),
     # (0, 0, 0.1),
 ]
 
 sequence3 = [
-    (-1.2, 0.4, 0.2),
-    (-1.2, 0.4, 0.1),
+    (-1.2, 0.4, 0.3),
+    (-0.5, -0.4, 0.1),
+    # (-1.2, 0.4, 0.2),
     # (0, 0.4, 0.3),
     # (0, 0, 0.1),
 ]
@@ -297,6 +303,7 @@ if __name__ == '__main__':
 
                 run_sequence(scf, scf2, scf3, sequence_ls, initial_drone_pos_ls)
                 
+                time.sleep(10)
                 #should be after stop()
                 write_log_history()
                 logconf1.stop()
