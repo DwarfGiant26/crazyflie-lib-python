@@ -7,10 +7,10 @@ nodes = {}
 edges = []
 
 # Import data
-with open('drone_lab_nodes.csv', newline='') as csvfile:
+with open('node_map.csv', newline='') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
-        nodes[row['src']] = (int(row['x']), int(row['y']), int(row['z']))
+        nodes[row['src']] = (float(row['x']), float(row['y']), float(row['z']))
         edges += [(row['src'], row['destination'],
                    {'distance': float(row['distance'])})]
 
