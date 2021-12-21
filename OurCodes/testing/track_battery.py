@@ -42,7 +42,7 @@ def init_log_history():
 
 
 def write_log_history():
-    with open('battery.csv', mode='w') as csv_file:
+    with open('battery2.csv', mode='w') as csv_file:
         fieldnames = ['time.ms'] + [param[0] for param in log_parameters]
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 
@@ -107,7 +107,7 @@ if __name__ == '__main__':
 
         cf = scf.cf
 
-        for y in range(40):
+        for y in range(10):
             time.sleep(60)
 
         # cf.param.set_value('kalman.resetEstimation', '1')
