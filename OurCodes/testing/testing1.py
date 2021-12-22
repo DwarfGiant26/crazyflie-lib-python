@@ -11,7 +11,7 @@ from cflib.crazyflie.log import LogConfig
 
 import matplotlib.pyplot as plt
 
-URI = 'radio://0/60/2M/E7E7E7E7E3'
+URI = 'radio://0/60/2M/E7E7E7E7E5'
 DEFAULT_HEIGHT = 0.1
 SAMPLE_PERIOD_MS = 10
 
@@ -106,9 +106,9 @@ if __name__ == '__main__':
         time.sleep(2)
         print("set kalman values")
 
-        for y in range(10):
-            cf.commander.send_hover_setpoint(0, 0, 0, y / 25)
-            time.sleep(0.1)
+        for y in range(1000):
+            cf.commander.send_hover_setpoint(0, 0, 0, 0.2)
+            time.sleep(1)
 
         """ for _ in range(20):
             cf.commander.send_hover_setpoint(0, 0, 0, 0.4)
