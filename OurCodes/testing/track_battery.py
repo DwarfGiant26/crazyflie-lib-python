@@ -42,7 +42,7 @@ def init_log_history():
 
 
 def write_log_history():
-    with open('battery2.csv', mode='w') as csv_file:
+    with open('battery1.csv', mode='a+') as csv_file:
         fieldnames = ['time.ms'] + [param[0] for param in log_parameters]
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 
