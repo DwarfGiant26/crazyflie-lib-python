@@ -35,6 +35,7 @@ log_parameters = [
 
 log_history = [[],[],[]]
 log_cycles = 0
+bat_volt = [-1,-1,-1] #battery voltage for uri1,uri2,and uri3 respectively
 
 
 def init_log_history():
@@ -61,9 +62,7 @@ def take_off_simple(scf):
 def logconf_callback_1(timestamp, data, logconf):
     global log_history, log_cycles
     data['time.ms'] = timestamp
-    # Convert FP16 to FP32
-    """ data['pm.vbat'] = np.frombuffer(struct.pack(
-        "H", int(hex(data['pm.vbat']), 16)), dtype=np.float16)[0] """
+    bat_volt[0] = float(data['pm.vbat'])
     
     log_history[0].append(data)
     log_cycles += 1
@@ -71,9 +70,7 @@ def logconf_callback_1(timestamp, data, logconf):
 def logconf_callback_2(timestamp, data, logconf):
     global log_history, log_cycles
     data['time.ms'] = timestamp
-    # Convert FP16 to FP32
-    """ data['pm.vbat'] = np.frombuffer(struct.pack(
-        "H", int(hex(data['pm.vbat']), 16)), dtype=np.float16)[0] """
+    bat_volt[1] = float(data['pm.vbat'])
     
     log_history[1].append(data)
     log_cycles += 1
@@ -81,9 +78,7 @@ def logconf_callback_2(timestamp, data, logconf):
 def logconf_callback_3(timestamp, data, logconf):
     global log_history, log_cycles
     data['time.ms'] = timestamp
-    # Convert FP16 to FP32
-    """ data['pm.vbat'] = np.frombuffer(struct.pack(
-        "H", int(hex(data['pm.vbat']), 16)), dtype=np.float16)[0] """
+    bat_volt[2] = float(data['pm.vbat'])
     
     log_history[2].append(data)
     log_cycles += 1
@@ -172,32 +167,104 @@ if __name__ == '__main__':
                 start = [(0,0,0),(0,0,0),(0,0,0)] #for scf, scf2, and scf3 respectively
                 intermediate = (0,0,0)
                 destination = [(0,0,0),(0,0,0),(0,0,0)]
+                upper_bat_thresh = 4.15 #battery percentage in which we stop charging cause we consider it to be fully charged
+                
+                #distance from drone to the helipads in the top of the building when the drone is first hovering in the source node and when it first arrive in the other node
+                hi_relative_height = 0.2 
+                #distance from drone to the helipads in the top of the building when the drone is trying to land(has to be a small number so that drone does not bounce)
+                lo_relative_height = 0.05
 
                 drones = [cf,cf2,cf3]
                 #find the drone closest to the intermediate to go first
                 dist = []
                 #calculate the distance between each drone to intermediate
                 for i in range(3):
-                    dist.append((distance(start[i]),drones[i],i))
+                    dist.append((distance(start[i],intermediate),drones[i],i))
                 #sort based on the distance
                 dist.sort()
+                #now the dist is list of sorted (distance from start to intermediate, cf1/2/3, drone id) that is sorted based out of distance from starting position of the drone to intermediate node
+                #drone id -> 0 for uri1, 1 for uri2, and 2 for uri3
 
+                #renaming to make things easier to read
+                first_drone = dist[0][1]
+                second_drone = dist[1][1]
+                third_drone = dist[2][1]
+                first_drone_id = dist[0][2]
+                second_drone_id = dist[1][2]
+                third_drone_id = dist[2][2]
+
+                #first drone go to intermediate
+                #hover
                 for y in range(30):
-                    dist[0][1].commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2], 0)
+                    first_drone.commander.send_position_setpoint(start[first_drone_id][0], start[first_drone_id][1], start[first_drone_id][2]+hi_relative_height, 0)
+                    time.sleep(0.1)
+                #go
+                for y in range(30):
+                    first_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+hi_relative_height, 0)
+                    time.sleep(0.1)
+                #slowly landing
+                for y in range(30):
+                    first_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+lo_relative_height, 0)
                     time.sleep(0.1)
 
-                for y in range(30):
-                    dist[0][1].commander.send_position_setpoint(destination[dist[0][2]][0], destination[dist[0][2]][1], destination[dist[0][2]][2], 0)
-                    dist[1][1].commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2], 0)
+                #wait for first drone to charge
+                while bat_volt[first_drone_id] < upper_bat_thresh:
                     time.sleep(0.1)
 
+                #first drone go to destination, and second drone go to intermediate
+                #hover
                 for y in range(30):
-                    dist[1][1].commander.send_position_setpoint(destination[dist[1][2]][0], destination[dist[1][2]][1], destination[dist[1][2]][2], 0)
-                    dist[2][1].commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2], 0)
+                    first_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+hi_relative_height, 0)
+                    second_drone.commander.send_position_setpoint(start[first_drone_id][0], start[first_drone_id][1], start[first_drone_id][2]+hi_relative_height, 0)
+                    time.sleep(0.1)
+                #go
+                for y in range(30):
+                    first_drone.commander.send_position_setpoint(destination[first_drone_id][0], destination[first_drone_id][1], destination[first_drone_id][2]+hi_relative_height, 0)
+                    second_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+hi_relative_height, 0)
+                    time.sleep(0.1)
+                #slowly landing
+                for y in range(30):
+                    first_drone.commander.send_position_setpoint(destination[first_drone_id][0], destination[first_drone_id][1], destination[first_drone_id][2]+lo_relative_height, 0)
+                    second_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+lo_relative_height, 0)
                     time.sleep(0.1)
 
+                #wait for second drone to charge
+                while bat_volt[second_drone_id] < upper_bat_thresh:
+                    time.sleep(0.1)
+
+                #second drone go to destination, and third drone go to intermediate
+                #hover
                 for y in range(30):
-                    dist[2][1].commander.send_position_setpoint(destination[dist[2][2]][0], destination[dist[2][2]][1], destination[dist[2][2]][2], 0)
+                    second_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+hi_relative_height, 0)
+                    third_drone.commander.send_position_setpoint(start[third_drone_id][0], start[third_drone_id][1], start[third_drone_id][2]+hi_relative_height, 0)
+                    time.sleep(0.1)
+                #go
+                for y in range(30):
+                    second_drone.commander.send_position_setpoint(destination[second_drone_id][0], destination[second_drone_id][1], destination[second_drone_id][2]+hi_relative_height, 0)
+                    third_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+hi_relative_height, 0)
+                    time.sleep(0.1)
+                #slowly landing
+                for y in range(30):
+                    second_drone.commander.send_position_setpoint(destination[second_drone_id][0], destination[second_drone_id][1], destination[second_drone_id][2]+lo_relative_height, 0)
+                    third_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+lo_relative_height, 0)
+                    time.sleep(0.1)
+                
+                #wait for third drone to charge
+                while bat_volt[third_drone_id] < upper_bat_thresh:
+                    time.sleep(0.1)
+
+                #third drone go to destination
+                #hover
+                for y in range(30):
+                    third_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+hi_relative_height, 0)
+                    time.sleep(0.1)
+                #go
+                for y in range(30):
+                    third_drone.commander.send_position_setpoint(destination[third_drone_id][0], destination[third_drone_id][1], destination[third_drone_id][2]+hi_relative_height, 0)
+                    time.sleep(0.1)
+                #slowly landing
+                for y in range(30):
+                    third_drone.commander.send_position_setpoint(destination[third_drone_id][0], destination[third_drone_id][1], destination[third_drone_id][2]+lo_relative_height, 0)
                     time.sleep(0.1)
 
                 cf.commander.send_stop_setpoint()
