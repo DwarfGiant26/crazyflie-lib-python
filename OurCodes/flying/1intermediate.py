@@ -69,6 +69,12 @@ def logconf_callback_1(timestamp, data, logconf):
     travel_dist[0] += distance(curr_coor,last_coor)
     data['travel_dist'] = travel_dist[0]
 
+    #waiting time
+    if waiting_node[0] != -1: #if it is not currently flying
+        waiting_time[0][waiting_node[0]] += SAMPLE_PERIOD_MS
+    a,b,c = waiting_time[0]
+    data['waiting_time'] = f"[{a}|{b}|{c}]" #format -> [waitingTimeInStart|waitingTimeInIntermediate|waitingTimeInDestination] all waiting time is currently in ms
+
     log_history[0].append(data)
     log_cycles += 1
 
@@ -81,6 +87,12 @@ def logconf_callback_2(timestamp, data, logconf):
     last_coor = (log_history[1][-1]['stateEstimate.x'], log_history[1][-1]['stateEstimate.y'], log_history[1][-1]['stateEstimate.z'])
     travel_dist[1] += distance(curr_coor,last_coor)
     data['travel_dist'] = travel_dist[1]
+
+    #waiting time
+    if waiting_node[1] != -1: #if it is not currently flying
+        waiting_time[1][waiting_node[1]] += SAMPLE_PERIOD_MS
+    a,b,c = waiting_time[1]
+    data['waiting_time'] = f"[{a}|{b}|{c}]"
 
     log_history[1].append(data)
     log_cycles += 1
@@ -95,6 +107,12 @@ def logconf_callback_3(timestamp, data, logconf):
     travel_dist[2] += distance(curr_coor,last_coor)
     data['travel_dist'] = travel_dist[2]
     
+    #waiting time
+    if waiting_node[2] != -1: #if it is not currently flying
+        waiting_time[2][waiting_node[2]] += SAMPLE_PERIOD_MS
+    a,b,c = waiting_time[2]
+    data['waiting_time'] = f"[{a}|{b}|{c}]"
+
     log_history[2].append(data)
     log_cycles += 1
 
@@ -179,11 +197,16 @@ if __name__ == '__main__':
                 print("set kalman values")
 
                 #specify start, intermediate, and destination
-                start = [(0,0,0),(0,0,0),(0,0,0)] #for scf, scf2, and scf3 respectively
+                start = [(0,0,0),(0,0,0),(0,0,0)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
                 intermediate = (0,0,0)
                 destination = [(0,0,0),(0,0,0),(0,0,0)]
                 travel_dist = [0,0,0]
+                waiting_time = [[0,0,0],[0,0,0],[0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate, = 2 means destination.
                 
+                #this contains waiting node for droneid 0,1,and 2 respectively. the value represent which node it is in (look at the other comment on whichnode), 
+                #if the value is -1 then it is currently not waiting in any node
+                waiting_node = [0,0,0]  
+
                 upper_bat_thresh = 4.15 #battery percentage in which we stop charging cause we consider it to be fully charged
                 
                 #distance from drone to the helipads in the top of the building when the drone is first hovering in the source node and when it first arrive in the other node
@@ -210,6 +233,7 @@ if __name__ == '__main__':
                 second_drone_id = dist[1][2]
                 third_drone_id = dist[2][2]
 
+                waiting_node[first_drone_id] = -1 #first drone is no longer waiting
                 #first drone go to intermediate
                 #hover
                 for y in range(30):
@@ -224,11 +248,14 @@ if __name__ == '__main__':
                     first_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+lo_relative_height, 0)
                     time.sleep(0.1)
 
+                waiting_node[first_drone_id] = 1 #first drone is waiting in intermediate node
                 #wait for first drone to charge
                 while bat_volt[first_drone_id] < upper_bat_thresh:
                     time.sleep(0.1)
 
                 #first drone go to destination, and second drone go to intermediate
+                waiting_node[first_drone_id] = -1
+                waiting_node[second_drone_id] = -1
                 #hover
                 for y in range(30):
                     first_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+hi_relative_height, 0)
@@ -245,11 +272,15 @@ if __name__ == '__main__':
                     second_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+lo_relative_height, 0)
                     time.sleep(0.1)
 
+                waiting_node[first_drone_id] = 2
+                waiting_node[second_drone_id] = 1
                 #wait for second drone to charge
                 while bat_volt[second_drone_id] < upper_bat_thresh:
                     time.sleep(0.1)
 
                 #second drone go to destination, and third drone go to intermediate
+                waiting_node[third_drone_id] = -1
+                waiting_node[second_drone_id] = -1
                 #hover
                 for y in range(30):
                     second_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+hi_relative_height, 0)
@@ -266,11 +297,14 @@ if __name__ == '__main__':
                     third_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+lo_relative_height, 0)
                     time.sleep(0.1)
                 
+                waiting_node[third_drone_id] = 1
+                waiting_node[second_drone_id] = 2
                 #wait for third drone to charge
                 while bat_volt[third_drone_id] < upper_bat_thresh:
                     time.sleep(0.1)
 
                 #third drone go to destination
+                waiting_node[third_drone_id] = -1
                 #hover
                 for y in range(30):
                     third_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+hi_relative_height, 0)
@@ -283,7 +317,9 @@ if __name__ == '__main__':
                 for y in range(30):
                     third_drone.commander.send_position_setpoint(destination[third_drone_id][0], destination[third_drone_id][1], destination[third_drone_id][2]+lo_relative_height, 0)
                     time.sleep(0.1)
-
+                
+                waiting_node[third_drone_id] = 2
+        
                 cf.commander.send_stop_setpoint()
                 cf2.commander.send_stop_setpoint()
                 cf3.commander.send_stop_setpoint()
