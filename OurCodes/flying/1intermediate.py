@@ -64,6 +64,11 @@ def logconf_callback_1(timestamp, data, logconf):
     data['time.ms'] = timestamp
     bat_volt[0] = float(data['pm.vbat'])
     
+    curr_coor = (data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.z'])
+    last_coor = (log_history[0][-1]['stateEstimate.x'], log_history[0][-1]['stateEstimate.y'], log_history[0][-1]['stateEstimate.z'])
+    travel_dist[0] += distance(curr_coor,last_coor)
+    data['travel_dist'] = travel_dist[0]
+
     log_history[0].append(data)
     log_cycles += 1
 
@@ -72,6 +77,11 @@ def logconf_callback_2(timestamp, data, logconf):
     data['time.ms'] = timestamp
     bat_volt[1] = float(data['pm.vbat'])
     
+    curr_coor = (data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.z'])
+    last_coor = (log_history[1][-1]['stateEstimate.x'], log_history[1][-1]['stateEstimate.y'], log_history[1][-1]['stateEstimate.z'])
+    travel_dist[1] += distance(curr_coor,last_coor)
+    data['travel_dist'] = travel_dist[1]
+
     log_history[1].append(data)
     log_cycles += 1
 
@@ -79,6 +89,11 @@ def logconf_callback_3(timestamp, data, logconf):
     global log_history, log_cycles
     data['time.ms'] = timestamp
     bat_volt[2] = float(data['pm.vbat'])
+
+    curr_coor = (data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.z'])
+    last_coor = (log_history[2][-1]['stateEstimate.x'], log_history[2][-1]['stateEstimate.y'], log_history[2][-1]['stateEstimate.z'])
+    travel_dist[2] += distance(curr_coor,last_coor)
+    data['travel_dist'] = travel_dist[2]
     
     log_history[2].append(data)
     log_cycles += 1
@@ -167,6 +182,8 @@ if __name__ == '__main__':
                 start = [(0,0,0),(0,0,0),(0,0,0)] #for scf, scf2, and scf3 respectively
                 intermediate = (0,0,0)
                 destination = [(0,0,0),(0,0,0),(0,0,0)]
+                travel_dist = [0,0,0]
+                
                 upper_bat_thresh = 4.15 #battery percentage in which we stop charging cause we consider it to be fully charged
                 
                 #distance from drone to the helipads in the top of the building when the drone is first hovering in the source node and when it first arrive in the other node
