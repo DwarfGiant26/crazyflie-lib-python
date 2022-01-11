@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 # Takes around 15 minutes to charge from 3.9 to 4.2. approximately 20-25 minutets for 3.7-4.2?
 
-URI = 'radio://0/60/2M/E7E7E7E7E5'
+URI = 'radio://0/60/2M/E7E7E7E7E3'
 DEFAULT_HEIGHT = 0.1
 SAMPLE_PERIOD_MS = 2500
 
@@ -42,7 +42,7 @@ def init_log_history():
 
 
 def write_log_history():
-    with open('battery1.csv', mode='a+') as csv_file:
+    with open('batteryE3.csv', mode='a+') as csv_file:
         fieldnames = ['time.ms'] + [param[0] for param in log_parameters]
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 
