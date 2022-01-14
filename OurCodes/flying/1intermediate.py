@@ -207,7 +207,7 @@ if __name__ == '__main__':
                 #if the value is -1 then it is currently not waiting in any node
                 waiting_node = [0,0,0]  
 
-                upper_bat_thresh = 4.15 #battery percentage in which we stop charging cause we consider it to be fully charged
+                upper_bat_thresh = 4.18 #battery percentage in which we stop charging cause we consider it to be fully charged
                 
                 #distance from drone to the helipads in the top of the building when the drone is first hovering in the source node and when it first arrive in the other node
                 hi_relative_height = 0.2 
