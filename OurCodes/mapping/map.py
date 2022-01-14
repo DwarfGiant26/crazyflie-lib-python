@@ -28,7 +28,7 @@ def draw_graph(graph: nx.Graph):
     "Draws the given graph using pyplot."
     pos = nx.get_node_attributes(graph, 'pos')
     labels = nx.get_edge_attributes(graph, 'distance')
-    nx.draw(graph, pos, with_labels=False)
+    nx.draw(graph, pos, with_labels=True)
     #nx.draw_networkx_edge_labels(graph, pos, edge_labels=labels)
     plt.show()
 
