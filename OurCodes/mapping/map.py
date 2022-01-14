@@ -10,9 +10,15 @@ edges = []
 with open('node_map.csv', newline='') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
-        nodes[row['Source']] = (float(row['X']), float(row['Y']), float(row['Z']))
         edges += [(row['Source'], row['Dest'],
                    {'Dist': float(row['Dist'])})]
+
+with open('BuildingPosition_noblanks.csv', newline='') as csvfile:
+    reader = csvfile.readlines()
+    for rows in reader:
+        row = rows.split(',')
+        nodes[row[0]] = (float(row[1]), float(row[2]), float(row[3]))
+    
 
 def create_graph(nodes: dict, edges) -> nx.Graph:
     "Converts the given nodes and edges into a NetworkX Graph."
