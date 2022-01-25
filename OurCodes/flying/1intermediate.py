@@ -8,14 +8,15 @@ from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from cflib.positioning.motion_commander import MotionCommander
 from cflib.crazyflie.log import LogConfig
-
+import math
 import matplotlib.pyplot as plt
+import os
 
-URI1 = 'radio://0/60/2M/E7E7E7E7E7'
+URI1 = 'radio://0/60/2M/E7E7E7E7E3'
 URI2 = 'radio://0/60/2M/E7E7E7E7E5'
-URI3 = 'radio://0/60/2M/E7E7E7E7E3'
+URI3 = 'radio://0/60/2M/E7E7E7E7E7'
 DEFAULT_HEIGHT = 0.1
-SAMPLE_PERIOD_MS = 10
+SAMPLE_PERIOD_MS = 100
 
 is_deck_attached = False
 
@@ -38,14 +39,101 @@ log_cycles = 0
 bat_volt = [-1,-1,-1] #battery voltage for uri1,uri2,and uri3 respectively
 
 
+#specify start, intermediate, and destination
+WIND_SPEED = 0
+WIND_ANGLE = 'None'
+start = [(1.65,1.20,0.10),(0.70,0.76,0.40),(1.19,1.12,0.12)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
+intermediate = (1.34,0.46,0.4)
+destination = [(0.68,0.34,1.01),(1.87,-0.16,0.34),(1.29,-0.36,0.94)]
+travel_dist = [0,0,0]
+waiting_time = [[0,0,0],[0,0,0],[0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate, = 2 means destination.
+path_name = [['A1','B2','F2'],['F1','B2','B1'],['A/E1','B2','C1']]
+
+relative_wind_direction = [0,0,0]
+first_timestamp = [0,0,0]
+#this contains waiting node for droneid 0,1,and 2 respectively. the value represent which node it is in (look at the other comment on whichnode), 
+#if the value is -1 then it is currently not waiting in any node
+waiting_node = [0,0,0]  
+
+upper_bat_thresh = 4.15 #battery percentage in which we stop charging cause we consider it to be fully charged
+
+#distance from drone to the helipads in the top of the building when the drone is first hovering in the source node and when it first arrive in the other node
+hi_relative_height = 0.7 
+#distance from drone to the helipads in the top of the building when the drone is trying to land(has to be a small number so that drone does not bounce)
+lo_relative_height = 0.1
+safety_sleep = 5
+
+from enum import Enum
+class WindDirection(Enum):
+    NONE = 0
+    HEAD = 1
+    TAIL = 2
+    CROSS = 3
+    DIAGONAL_HEAD = 4
+    DIAGONAL_TAIL = 5
+
+def find_angle(x1, y1, x2, y2) -> float:
+    "Finds the angle between two points."
+    myradians = math.atan2(y2-y1, x2-x1)
+    mydegrees = math.degrees(myradians)
+    return mydegrees
+
+
+def determine_direction(start, end) -> WindDirection:
+    "Determines if the wind is a head wind, tail wind, side wind, diagonal against wind, diagonal with wind, or no wind."
+
+    if WIND_SPEED == 0:
+        return WindDirection.NONE
+
+    # Calculate drone angle
+    drone_angle = find_angle(start[0], start[1], end[0], end[1])
+
+    # Calculate wind angle relative to drone angle
+    rel_wind_angle = WIND_ANGLE - drone_angle
+    if rel_wind_angle > 180:
+        rel_wind_angle -= 360
+    elif rel_wind_angle < -180:
+        rel_wind_angle += 360
+
+    # Round to nearest category
+    if (rel_wind_angle >= -180 and rel_wind_angle < -150) or \
+       (rel_wind_angle <= 180 and rel_wind_angle > 150):
+        return 1
+
+    if (rel_wind_angle >= -150 and rel_wind_angle < -120) or \
+       (rel_wind_angle <= 150 and rel_wind_angle > 120):
+        return 4
+
+    if (rel_wind_angle >= -120 and rel_wind_angle < -60) or \
+       (rel_wind_angle <= 120 and rel_wind_angle > 60):
+        return 3
+
+    if (rel_wind_angle >= -60 and rel_wind_angle < -30) or \
+       (rel_wind_angle <= 60 and rel_wind_angle > 30):
+        return 5
+
+    if (rel_wind_angle >= -30 and rel_wind_angle <= 0) or \
+       (rel_wind_angle <= 30 and rel_wind_angle >= 0):
+        return 2
+
+
+def polar_to_cartesian(radius: float, angle: float):
+    "Converts polar coordinate radius and angle to Cartesian X and Y"
+    x = radius * math.cos(angle * (math.pi / 180))
+    y = radius * math.sin(angle * (math.pi / 180))
+    return x, y
+
 def init_log_history():
     pass
 
 
 def write_log_history():
+    folder_name = f"/home/alan/drone/Ours/OurCodes/flying/1Intermediate/path_1/wind_speed_0/wind_direction_None"
+    
+    drone_names = ['E3','E5','E7']
     for i in range(3):
-        with open(f'multiple1_drone_{i}.csv', mode='w') as csv_file:
-            fieldnames = ['time.ms'] + [param[0] for param in log_parameters]
+        with open(f'{folder_name}/drone_{drone_names[i]}.csv', mode='w') as csv_file:
+            fieldnames = ['time.ms'] + [param[0] for param in log_parameters] + ['drone_id','node_name','wind_speed','global_wind_direction','relative_wind_direction','travel_dist','waiting_time']
             writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 
             writer.writeheader()
@@ -61,11 +149,26 @@ def take_off_simple(scf):
 
 def logconf_callback_1(timestamp, data, logconf):
     global log_history, log_cycles
-    data['time.ms'] = timestamp
-    bat_volt[0] = float(data['pm.vbat'])
+
+    data['drone_id'] = 0
     
+    bat_volt[0] = float(data['pm.vbat'])
+    if waiting_node != -1:
+        data['node_name'] = path_name[waiting_node[0]]
+    else:
+        data['node_name'] = 'fly'
+    data['wind_speed'] = WIND_SPEED
+    data['global_wind_direction'] = WIND_ANGLE
+    data['relative_wind_direction'] = relative_wind_direction[0]
+
     curr_coor = (data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.z'])
-    last_coor = (log_history[0][-1]['stateEstimate.x'], log_history[0][-1]['stateEstimate.y'], log_history[0][-1]['stateEstimate.z'])
+    if len(log_history[0]) > 0:
+        last_coor = (log_history[0][-1]['stateEstimate.x'], log_history[0][-1]['stateEstimate.y'], log_history[0][-1]['stateEstimate.z'])
+        data['time.ms'] = timestamp - first_timestamp[0]
+    else:
+        last_coor = start[0][:-1] + (0,)
+        data['time.ms'] = 0
+        first_timestamp[0] = timestamp
     travel_dist[0] += distance(curr_coor,last_coor)
     data['travel_dist'] = travel_dist[0]
 
@@ -80,11 +183,25 @@ def logconf_callback_1(timestamp, data, logconf):
 
 def logconf_callback_2(timestamp, data, logconf):
     global log_history, log_cycles
+    data['drone_id'] = 1
     data['time.ms'] = timestamp
     bat_volt[1] = float(data['pm.vbat'])
+    if waiting_node != -1:
+        data['node_name'] = path_name[waiting_node[1]]
+    else:
+        data['node_name'] = 'fly'
+    data['wind_speed'] = WIND_SPEED
+    data['global_wind_direction'] = WIND_ANGLE
+    data['relative_wind_direction'] = relative_wind_direction[1]
     
     curr_coor = (data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.z'])
-    last_coor = (log_history[1][-1]['stateEstimate.x'], log_history[1][-1]['stateEstimate.y'], log_history[1][-1]['stateEstimate.z'])
+    if len(log_history[1]) > 0:
+        last_coor = (log_history[1][-1]['stateEstimate.x'], log_history[1][-1]['stateEstimate.y'], log_history[1][-1]['stateEstimate.z'])
+        data['time.ms'] = timestamp - first_timestamp[1]
+    else:
+        last_coor = start[1][:-1] + (0,) 
+        data['time.ms'] = 0
+        first_timestamp[1] = timestamp
     travel_dist[1] += distance(curr_coor,last_coor)
     data['travel_dist'] = travel_dist[1]
 
@@ -99,11 +216,25 @@ def logconf_callback_2(timestamp, data, logconf):
 
 def logconf_callback_3(timestamp, data, logconf):
     global log_history, log_cycles
+    data['drone_id'] = 2
     data['time.ms'] = timestamp
     bat_volt[2] = float(data['pm.vbat'])
+    if waiting_node != -1:
+        data['node_name'] = path_name[waiting_node[2]]
+    else:
+        data['node_name'] = 'fly'
+    data['wind_speed'] = WIND_SPEED
+    data['global_wind_direction'] = WIND_ANGLE
+    data['relative_wind_direction'] = relative_wind_direction[2]
 
     curr_coor = (data['stateEstimate.x'], data['stateEstimate.y'], data['stateEstimate.z'])
-    last_coor = (log_history[2][-1]['stateEstimate.x'], log_history[2][-1]['stateEstimate.y'], log_history[2][-1]['stateEstimate.z'])
+    if len(log_history[2]) > 0:
+        last_coor = (log_history[2][-1]['stateEstimate.x'], log_history[2][-1]['stateEstimate.y'], log_history[2][-1]['stateEstimate.z'])
+        data['time.ms'] = timestamp - first_timestamp[2]
+    else:
+        last_coor = start[2][:-1] + (0,)
+        data['time.ms'] = 0
+        first_timestamp[2] = timestamp
     travel_dist[2] += distance(curr_coor,last_coor)
     data['travel_dist'] = travel_dist[2]
     
@@ -136,11 +267,11 @@ if __name__ == '__main__':
 
     cflib.crtp.init_drivers()
     with SyncCrazyflie(URI1, cf=Crazyflie(rw_cache='./cache')) as scf:
-        print("Connected to E7")
+        print("Connected to E3")
         with SyncCrazyflie(URI2, cf=Crazyflie(rw_cache='./cache')) as scf2:
             print("Connected to E5")
             with SyncCrazyflie(URI3, cf=Crazyflie(rw_cache='./cache')) as scf3:
-                print("Connected to E3")
+                print("Connected to E7")
 
                 print("reached sync")
                 scf.cf.param.add_update_callback(
@@ -195,24 +326,7 @@ if __name__ == '__main__':
                 cf3.param.set_value('kalman.resetEstimation', '0')
                 time.sleep(2)
                 print("set kalman values")
-
-                #specify start, intermediate, and destination
-                start = [(0,0,0),(0,0,0),(0,0,0)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
-                intermediate = (0,0,0)
-                destination = [(0,0,0),(0,0,0),(0,0,0)]
-                travel_dist = [0,0,0]
-                waiting_time = [[0,0,0],[0,0,0],[0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate, = 2 means destination.
                 
-                #this contains waiting node for droneid 0,1,and 2 respectively. the value represent which node it is in (look at the other comment on whichnode), 
-                #if the value is -1 then it is currently not waiting in any node
-                waiting_node = [0,0,0]  
-
-                upper_bat_thresh = 4.18 #battery percentage in which we stop charging cause we consider it to be fully charged
-                
-                #distance from drone to the helipads in the top of the building when the drone is first hovering in the source node and when it first arrive in the other node
-                hi_relative_height = 0.2 
-                #distance from drone to the helipads in the top of the building when the drone is trying to land(has to be a small number so that drone does not bounce)
-                lo_relative_height = 0.05
 
                 drones = [cf,cf2,cf3]
                 #find the drone closest to the intermediate to go first
@@ -224,7 +338,7 @@ if __name__ == '__main__':
                 dist.sort()
                 #now the dist is list of sorted (distance from start to intermediate, cf1/2/3, drone id) that is sorted based out of distance from starting position of the drone to intermediate node
                 #drone id -> 0 for uri1, 1 for uri2, and 2 for uri3
-
+                print(dist)
                 #renaming to make things easier to read
                 first_drone = dist[0][1]
                 second_drone = dist[1][1]
@@ -232,49 +346,65 @@ if __name__ == '__main__':
                 first_drone_id = dist[0][2]
                 second_drone_id = dist[1][2]
                 third_drone_id = dist[2][2]
+                hover_time = 3 #in seconds
+                hover_time *= 10 #convert to deci seconds
+                hover_time = int(hover_time)
+
+                print(f'first id {first_drone_id}')
+                print(f'second id {second_drone_id}')
+                print(f'third id {third_drone_id}')
 
                 waiting_node[first_drone_id] = -1 #first drone is no longer waiting
                 #first drone go to intermediate
                 #hover
-                for y in range(30):
+                for y in range(hover_time):
                     first_drone.commander.send_position_setpoint(start[first_drone_id][0], start[first_drone_id][1], start[first_drone_id][2]+hi_relative_height, 0)
                     time.sleep(0.1)
+                relative_wind_direction[first_drone_id] = determine_direction(start[first_drone_id],intermediate) 
                 #go
-                for y in range(30):
+                for y in range(hover_time):
                     first_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+hi_relative_height, 0)
                     time.sleep(0.1)
+                relative_wind_direction[first_drone_id] = 0
                 #slowly landing
-                for y in range(30):
-                    first_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+lo_relative_height, 0)
+                for y in range(hover_time):
+                    first_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], lo_relative_height, 0)
                     time.sleep(0.1)
 
                 waiting_node[first_drone_id] = 1 #first drone is waiting in intermediate node
                 #wait for first drone to charge
+                time.sleep(safety_sleep)
                 while bat_volt[first_drone_id] < upper_bat_thresh:
                     time.sleep(0.1)
+                
 
                 #first drone go to destination, and second drone go to intermediate
                 waiting_node[first_drone_id] = -1
                 waiting_node[second_drone_id] = -1
                 #hover
-                for y in range(30):
+                for y in range(hover_time):
                     first_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+hi_relative_height, 0)
-                    second_drone.commander.send_position_setpoint(start[first_drone_id][0], start[first_drone_id][1], start[first_drone_id][2]+hi_relative_height, 0)
+                    second_drone.commander.send_position_setpoint(start[second_drone_id][0], start[second_drone_id][1], start[second_drone_id][2]+hi_relative_height, 0)
                     time.sleep(0.1)
+                relative_wind_direction[first_drone_id] = determine_direction(intermediate,destination[first_drone_id])
+                relative_wind_direction[second_drone_id] = determine_direction(start[second_drone_id],intermediate)
                 #go
-                for y in range(30):
+                for y in range(hover_time):
                     first_drone.commander.send_position_setpoint(destination[first_drone_id][0], destination[first_drone_id][1], destination[first_drone_id][2]+hi_relative_height, 0)
                     second_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+hi_relative_height, 0)
                     time.sleep(0.1)
+                relative_wind_direction[first_drone_id] = 0
+                relative_wind_direction[second_drone_id] = 0
                 #slowly landing
-                for y in range(30):
-                    first_drone.commander.send_position_setpoint(destination[first_drone_id][0], destination[first_drone_id][1], destination[first_drone_id][2]+lo_relative_height, 0)
-                    second_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+lo_relative_height, 0)
+                for y in range(hover_time):
+                    first_drone.commander.send_position_setpoint(destination[first_drone_id][0], destination[first_drone_id][1],lo_relative_height, 0)
+                    second_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], lo_relative_height, 0)
                     time.sleep(0.1)
 
                 waiting_node[first_drone_id] = 2
                 waiting_node[second_drone_id] = 1
                 #wait for second drone to charge
+                time.sleep(safety_sleep)
                 while bat_volt[second_drone_id] < upper_bat_thresh:
                     time.sleep(0.1)
 
@@ -282,40 +412,48 @@ if __name__ == '__main__':
                 waiting_node[third_drone_id] = -1
                 waiting_node[second_drone_id] = -1
                 #hover
-                for y in range(30):
+                print(f'hover {second_drone_id} go to {intermediate[0], intermediate[1], intermediate[2]+hi_relative_height}')
+                print(f'hover {third_drone_id} go to {start[third_drone_id][0], start[third_drone_id][1], start[third_drone_id][2]+hi_relative_height}')
+                for y in range(hover_time):
                     second_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+hi_relative_height, 0)
                     third_drone.commander.send_position_setpoint(start[third_drone_id][0], start[third_drone_id][1], start[third_drone_id][2]+hi_relative_height, 0)
                     time.sleep(0.1)
+                relative_wind_direction[second_drone_id] = determine_direction(intermediate,destination[second_drone_id])
+                relative_wind_direction[third_drone_id] = determine_direction(start[third_drone_id],intermediate)
                 #go
-                for y in range(30):
+                for y in range(hover_time):
                     second_drone.commander.send_position_setpoint(destination[second_drone_id][0], destination[second_drone_id][1], destination[second_drone_id][2]+hi_relative_height, 0)
                     third_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+hi_relative_height, 0)
                     time.sleep(0.1)
+                relative_wind_direction[third_drone_id] = 0
+                relative_wind_direction[second_drone_id] = 0
                 #slowly landing
-                for y in range(30):
-                    second_drone.commander.send_position_setpoint(destination[second_drone_id][0], destination[second_drone_id][1], destination[second_drone_id][2]+lo_relative_height, 0)
-                    third_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+lo_relative_height, 0)
+                for y in range(hover_time):
+                    second_drone.commander.send_position_setpoint(destination[second_drone_id][0], destination[second_drone_id][1], lo_relative_height, 0)
+                    third_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], lo_relative_height, 0)
                     time.sleep(0.1)
                 
                 waiting_node[third_drone_id] = 1
                 waiting_node[second_drone_id] = 2
                 #wait for third drone to charge
+                time.sleep(safety_sleep)
                 while bat_volt[third_drone_id] < upper_bat_thresh:
                     time.sleep(0.1)
-
+                
                 #third drone go to destination
                 waiting_node[third_drone_id] = -1
                 #hover
-                for y in range(30):
+                for y in range(hover_time):
                     third_drone.commander.send_position_setpoint(intermediate[0], intermediate[1], intermediate[2]+hi_relative_height, 0)
                     time.sleep(0.1)
+                relative_wind_direction[third_drone_id] = determine_direction(intermediate,destination[third_drone_id])
                 #go
-                for y in range(30):
+                for y in range(hover_time):
                     third_drone.commander.send_position_setpoint(destination[third_drone_id][0], destination[third_drone_id][1], destination[third_drone_id][2]+hi_relative_height, 0)
                     time.sleep(0.1)
                 #slowly landing
-                for y in range(30):
-                    third_drone.commander.send_position_setpoint(destination[third_drone_id][0], destination[third_drone_id][1], destination[third_drone_id][2]+lo_relative_height, 0)
+                for y in range(hover_time):
+                    third_drone.commander.send_position_setpoint(destination[third_drone_id][0], destination[third_drone_id][1], lo_relative_height, 0)
                     time.sleep(0.1)
                 
                 waiting_node[third_drone_id] = 2
