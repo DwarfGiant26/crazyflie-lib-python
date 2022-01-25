@@ -40,8 +40,9 @@ bat_volt = [-1,-1,-1] #battery voltage for uri1,uri2,and uri3 respectively
 
 
 #specify start, intermediate, and destination
-WIND_SPEED = 0
-WIND_ANGLE = 'None'
+#wind speed option are 6.1, 7.6, 9.7
+WIND_SPEED = 9.7
+WIND_ANGLE = 90
 start = [(1.65,1.20,0.10),(0.70,0.76,0.40),(1.19,1.12,0.12)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
 intermediate = (1.34,0.46,0.4)
 destination = [(0.68,0.34,1.01),(1.87,-0.16,0.34),(1.29,-0.36,0.94)]
@@ -90,31 +91,8 @@ def determine_direction(start, end) -> WindDirection:
 
     # Calculate wind angle relative to drone angle
     rel_wind_angle = WIND_ANGLE - drone_angle
-    if rel_wind_angle > 180:
-        rel_wind_angle -= 360
-    elif rel_wind_angle < -180:
-        rel_wind_angle += 360
-
-    # Round to nearest category
-    if (rel_wind_angle >= -180 and rel_wind_angle < -150) or \
-       (rel_wind_angle <= 180 and rel_wind_angle > 150):
-        return 1
-
-    if (rel_wind_angle >= -150 and rel_wind_angle < -120) or \
-       (rel_wind_angle <= 150 and rel_wind_angle > 120):
-        return 4
-
-    if (rel_wind_angle >= -120 and rel_wind_angle < -60) or \
-       (rel_wind_angle <= 120 and rel_wind_angle > 60):
-        return 3
-
-    if (rel_wind_angle >= -60 and rel_wind_angle < -30) or \
-       (rel_wind_angle <= 60 and rel_wind_angle > 30):
-        return 5
-
-    if (rel_wind_angle >= -30 and rel_wind_angle <= 0) or \
-       (rel_wind_angle <= 30 and rel_wind_angle >= 0):
-        return 2
+    
+    return rel_wind_angle
 
 
 def polar_to_cartesian(radius: float, angle: float):
@@ -128,7 +106,7 @@ def init_log_history():
 
 
 def write_log_history():
-    folder_name = f"/home/alan/drone/Ours/OurCodes/flying/1Intermediate/path_1/wind_speed_0/wind_direction_None"
+    folder_name = f"/home/alan/drone/Ours/OurCodes/flying/1Intermediate/path_1/wind_speed_3/wind_direction_{WIND_ANGLE}"
     
     drone_names = ['E3','E5','E7']
     for i in range(3):
