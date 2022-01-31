@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 path_no = 2
-speed_no = 1
+speed_no = 2
 angle = 270
 
 time_dataE3 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/1Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv", usecols = ['time.ms'])
