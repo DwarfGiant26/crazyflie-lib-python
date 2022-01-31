@@ -41,14 +41,54 @@ bat_volt = [-1,-1,-1] #battery voltage for uri1,uri2,and uri3 respectively
 
 #specify start, intermediate, and destination
 #wind speed option are 6.1, 7.6, 9.7
-WIND_SPEED = 9.7
-WIND_ANGLE = 90
+WIND_SPEED = 6.1
+WIND_ANGLE = 270
+
+
+""" 
+#path 1
 start = [(1.65,1.20,0.10),(0.70,0.76,0.40),(1.19,1.12,0.12)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
 intermediate = (1.34,0.46,0.4)
 destination = [(0.68,0.34,1.01),(1.87,-0.16,0.34),(1.29,-0.36,0.94)]
 travel_dist = [0,0,0]
 waiting_time = [[0,0,0],[0,0,0],[0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate, = 2 means destination.
-path_name = [['A1','B2','F2'],['F1','B2','B1'],['A/E1','B2','C1']]
+path_name = [['A1','B2','F2'],['F1','B2','B1'],['A/E1','B2','C1']] """
+
+
+#path 2
+start = [(0.68,0.34,1.01),(1.87,-0.16,0.34),(1.29,-0.36,0.94)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
+intermediate = (1.34,0.46,0.4)
+destination = [(1.65,1.20,0.10),(0.70,0.76,0.40),(1.19,1.12,0.12)]
+travel_dist = [0,0,0]
+waiting_time = [[0,0,0],[0,0,0],[0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate, = 2 means destination.
+path_name = [['F2','B2','A1'],['B1','B2','F1'],['C1','B2','A/E1']]
+
+""" #path 2 not used
+start = [(0.59,1.13,1.08),(1.24,-0.31,0.94),(0.70,-0.74,0.58)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
+intermediate = (1.34,0.46,0.4)
+destination = [(0.70,0.76,0.75),(1.65,1.20,0.10),(1.47,1.18,0.12)]
+travel_dist = [0,0,0]
+waiting_time = [[0,0,0],[0,0,0],[0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate, = 2 means destination.
+path_name = [['E2','B2','C1'],['C1','B2','A1'],['G1','B2','A2']] #this is path for e3, e5, and e7 respectively
+# order of flight: e5, e3, e7 """
+
+""" #path 3
+start = [(0.04,0.53,0.83),(0.70,-0.74,0.58),(1.24,-0.31,0.94)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
+intermediate = (0.70,0.76,0.75)
+destination = [(0.68,0.34,1.01),(1.19,1.12,0.12),(0.04,0.53,0.83)]
+travel_dist = [0,0,0]
+waiting_time = [[0,0,0],[0,0,0],[0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate, = 2 means destination.
+path_name = [['A1','F1','F2'],['G1','F1','A/B1'],['C1','F1','J1']] #this is path for e3, e5, and e7 respectively
+# order of flight:  """
+
+""" #path 4
+start = [(0.04,0.53,0.83),(0.70,-0.74,0.58),(1.24,-0.31,0.94)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
+intermediate = (0.70,0.76,0.75)
+destination = [(0.68,0.34,1.01),(1.19,1.12,0.12),(0.04,0.53,0.83)]
+travel_dist = [0,0,0]
+waiting_time = [[0,0,0],[0,0,0],[0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate, = 2 means destination.
+path_name = [['C1','F2','F1'],['A1','F2','J1'],['E1B','F2','G1']] #this is path for e3, e5, and e7 respectively
+# order of flight:  """
 
 relative_wind_direction = [0,0,0]
 first_timestamp = [0,0,0]
@@ -59,7 +99,7 @@ waiting_node = [0,0,0]
 upper_bat_thresh = 4.15 #battery percentage in which we stop charging cause we consider it to be fully charged
 
 #distance from drone to the helipads in the top of the building when the drone is first hovering in the source node and when it first arrive in the other node
-hi_relative_height = 0.7 
+hi_relative_height = 0.5 
 #distance from drone to the helipads in the top of the building when the drone is trying to land(has to be a small number so that drone does not bounce)
 lo_relative_height = 0.1
 safety_sleep = 5
@@ -106,7 +146,7 @@ def init_log_history():
 
 
 def write_log_history():
-    folder_name = f"/home/alan/drone/Ours/OurCodes/flying/1Intermediate/path_1/wind_speed_3/wind_direction_{WIND_ANGLE}"
+    folder_name = f"/home/alan/drone/Ours/OurCodes/flying/1Intermediate/path_2/wind_speed_1/wind_direction_{WIND_ANGLE}"
     
     drone_names = ['E3','E5','E7']
     for i in range(3):
