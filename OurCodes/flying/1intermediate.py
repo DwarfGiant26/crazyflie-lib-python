@@ -41,9 +41,8 @@ bat_volt = [-1,-1,-1] #battery voltage for uri1,uri2,and uri3 respectively
 
 #specify start, intermediate, and destination
 #wind speed option are 6.1, 7.6, 9.7
-WIND_SPEED = 0
-WIND_ANGLE = 'None'
-
+WIND_SPEED = 6.1
+WIND_ANGLE = 180
 
 """ 
 #path 1
@@ -72,23 +71,32 @@ waiting_time = [[0,0,0],[0,0,0],[0,0,0]] #to use: waiting_time[droneid][whichnod
 path_name = [['E2','B2','C1'],['C1','B2','A1'],['G1','B2','A2']] #this is path for e3, e5, and e7 respectively
 # order of flight: e5, e3, e7 """
 
-#path 3
-start = [(0.04,0.53,0.83),(0.70,-0.74,0.58),(1.24,-0.31,0.94)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
+""" #path 3
+start = [(1.24,-0.31,0.94),(0.70,-0.74,0.58),(1.65,1.20,0.10)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
 intermediate = (0.70,0.76,0.75)
-destination = [(0.68,0.34,1.01),(1.19,1.12,0.12),(0.04,0.53,0.83)]
+destination = [(0.04,0.53,0.83),(1.19,1.12,0.12),(0.59,1.13,1.28)]
 travel_dist = [0,0,0]
 waiting_time = [[0,0,0],[0,0,0],[0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate, = 2 means destination.
-path_name = [['A1','F1','F2'],['G1','F1','A/B1'],['C1','F1','J1']] #this is path for e3, e5, and e7 respectively
-# order of flight: 
+path_name = [['C1','F1','J1'],['G1','F1','A/B1'],['A1','F1','E2']] #this is path for e3, e5, and e7 respectively
+"""
 
 """ #path 4
-start = [(0.04,0.53,0.83),(0.70,-0.74,0.58),(1.24,-0.31,0.94)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
+start = [(1.24,-0.31,0.58),(0.70,-0.74,0.10),(1.65,1.20,0.94)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
 intermediate = (0.70,0.76,0.75)
-destination = [(0.68,0.34,1.01),(1.19,1.12,0.12),(0.04,0.53,0.83)]
+destination = [(0.04,0.53,0.12),(1.19,1.12,1.28),(0.59,1.13,0.83)]
+travel_dist = [0,0,0]
+waiting_time = [[0,0,0],[0,0,0],[0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate, = 2 means destination.
+path_name = [['C1','F1','J1'],['G1','F1','A/B1'],['A1','F1','E2']] #this is path for e3, e5, and e7 respectively
+# order of flight: e7,e3,e5  """
+
+#path 5
+start = [(1.24,-0.31,0.94),(1.65,1.20,0.10),(0.81,1.13,1.1)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
+intermediate = (0.68,0.34,1.01)
+destination = [(0.70,0.76,0.75),(0.04,0.53,0.83),(0.70,-0.74,0.58)]
 travel_dist = [0,0,0]
 waiting_time = [[0,0,0],[0,0,0],[0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate, = 2 means destination.
 path_name = [['C1','F2','F1'],['A1','F2','J1'],['E1B','F2','G1']] #this is path for e3, e5, and e7 respectively
-# order of flight:  """
+# order of flight: e7, e3, e5
 
 relative_wind_direction = [0,0,0]
 first_timestamp = [0,0,0]
@@ -101,8 +109,8 @@ upper_bat_thresh = 4.15 #battery percentage in which we stop charging cause we c
 #distance from drone to the helipads in the top of the building when the drone is first hovering in the source node and when it first arrive in the other node
 hi_relative_height = 0.5 
 #distance from drone to the helipads in the top of the building when the drone is trying to land(has to be a small number so that drone does not bounce)
-lo_relative_height = 0.1
-safety_sleep = 5
+lo_relative_height = 0.15
+safety_sleep = 8
 
 from enum import Enum
 class WindDirection(Enum):
@@ -146,7 +154,7 @@ def init_log_history():
 
 
 def write_log_history():
-    folder_name = f"/home/alan/drone/Ours/OurCodes/flying/1Intermediate/path_3/wind_speed_0/wind_direction_{WIND_ANGLE}"
+    folder_name = f"/home/alan/drone/Ours/OurCodes/flying/1Intermediate/path_5/wind_speed_1/wind_direction_{WIND_ANGLE}"
     
     drone_names = ['E3','E5','E7']
     for i in range(3):
@@ -371,7 +379,7 @@ if __name__ == '__main__':
                 print(f'first id {first_drone_id}')
                 print(f'second id {second_drone_id}')
                 print(f'third id {third_drone_id}')
-
+                
                 waiting_node[first_drone_id] = -1 #first drone is no longer waiting
                 #first drone go to intermediate
                 #hover

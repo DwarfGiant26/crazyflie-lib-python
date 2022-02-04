@@ -2,7 +2,7 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
 
-path_no = 2
+path_no = 5
 speed_no = 2
 angle = 270
 
@@ -70,6 +70,20 @@ plt.plot(x_E5, y_E5, color='green')
 plt.plot(x_E7, y_E7, color='blue')
 plt.xlabel("X axis")
 plt.ylabel("Y axis")
+plt.show()
+
+plt.plot(time_dataE3, y_E3, color='red')
+plt.plot(time_dataE5, y_E5, color='green')
+plt.plot(time_dataE7, y_E7, color='blue')
+plt.xlabel("time")
+plt.ylabel("Y axis")
+plt.show()
+
+plt.plot(time_dataE3, x_E3, color='red')
+plt.plot(time_dataE5, x_E5, color='green')
+plt.plot(time_dataE7, x_E7, color='blue')
+plt.xlabel("time")
+plt.ylabel("X axis")
 plt.show()
 
 plt.plot(time_dataE3/1000, z_E3, color='red')
