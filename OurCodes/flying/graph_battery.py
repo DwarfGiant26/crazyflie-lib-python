@@ -4,7 +4,7 @@ import numpy as np
 
 path_no = 5
 speed_no = 2
-angle = 270
+angle = 90
 
 time_dataE3 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/1Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv", usecols = ['time.ms'])
 volt_dataE3 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/1Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv", usecols = ['pm.vbat'])

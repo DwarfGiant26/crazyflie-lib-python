@@ -41,8 +41,8 @@ bat_volt = [-1,-1,-1] #battery voltage for uri1,uri2,and uri3 respectively
 
 #specify start, intermediate, and destination
 #wind speed option are 6.1, 7.6, 9.7
-WIND_SPEED = 6.1
-WIND_ANGLE = 180
+WIND_SPEED = 7.6
+WIND_ANGLE = 90
 
 """ 
 #path 1
@@ -109,7 +109,7 @@ upper_bat_thresh = 4.15 #battery percentage in which we stop charging cause we c
 #distance from drone to the helipads in the top of the building when the drone is first hovering in the source node and when it first arrive in the other node
 hi_relative_height = 0.5 
 #distance from drone to the helipads in the top of the building when the drone is trying to land(has to be a small number so that drone does not bounce)
-lo_relative_height = 0.15
+lo_relative_height = 0.2
 safety_sleep = 8
 
 from enum import Enum
@@ -154,7 +154,7 @@ def init_log_history():
 
 
 def write_log_history():
-    folder_name = f"/home/alan/drone/Ours/OurCodes/flying/1Intermediate/path_5/wind_speed_1/wind_direction_{WIND_ANGLE}"
+    folder_name = f"/home/alan/drone/Ours/OurCodes/flying/1Intermediate/path_5/wind_speed_2/wind_direction_{WIND_ANGLE}"
     
     drone_names = ['E3','E5','E7']
     for i in range(3):
