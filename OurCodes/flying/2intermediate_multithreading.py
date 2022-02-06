@@ -42,8 +42,8 @@ bat_volt = [-1,-1,-1] #battery voltage for uri1,uri2,and uri3 respectively
 
 #specify start, intermediate, and destination
 #wind speed option are 6.1, 7.6, 9.7
-WIND_SPEED = 7.6
-WIND_ANGLE = 90
+WIND_SPEED = 0
+WIND_ANGLE = 'None'
 
 """ 
 #path 1
@@ -52,7 +52,7 @@ intermediate = (1.34,0.46,0.4)
 destination = [(0.68,0.34,1.01),(1.87,-0.16,0.34),(1.29,-0.36,0.94)]
 travel_dist = [0,0,0]
 waiting_time = [[0,0,0],[0,0,0],[0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate, = 2 means destination.
-path_name = [['A1','B2','F2'],['F1','B2','B1'],['A/E1','B2','C1']] """
+path_name = [['A1','B2','F1','F2'],['J1','B2','F1','B1'],['A/E1','B2','F1','C1']] """
 
 
 """ #path 2
@@ -81,14 +81,14 @@ waiting_time = [[0,0,0],[0,0,0],[0,0,0]] #to use: waiting_time[droneid][whichnod
 path_name = [['C1','F1','J1'],['G1','F1','A/B1'],['A1','F1','E2']] #this is path for e3, e5, and e7 respectively
 """
 
-#path 4
+""" #path 4
 start = [(1.24,-0.31,0.58),(0.70,-0.74,0.10),(1.65,1.20,0.94)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
 intermediate = [(0.70,0.76,0.75),(0.70,0.76,0.75)]
 destination = [(0.04,0.53,0.12),(1.19,1.12,1.28),(0.59,1.13,0.83)]
 travel_dist = [0,0,0]
-waiting_time = [[0,0,0],[0,0,0],[0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate, = 2 means destination.
+waiting_time = [[0,0,0,0],[0,0,0,0],[0,0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate 1, = 2 means intermediate 2, =3 means destination.
 path_name = [['C1','F1','J1'],['G1','F1','A/B1'],['A1','F1','E2']] #this is path for e3, e5, and e7 respectively
-# order of flight: e7,e3,e5 
+# order of flight: e7,e3,e5  """
 
 """ #path 4 not used
 start = [(0.04,0.53,0.83),(0.70,-0.74,0.58),(1.24,-0.31,0.94)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
@@ -161,7 +161,7 @@ def init_log_history():
 
 
 def write_log_history():
-    folder_name = f"/home/alan/drone/Ours/OurCodes/flying/1Intermediate/path_4/wind_speed_2/wind_direction_{WIND_ANGLE}"
+    folder_name = f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_1/wind_speed_0/wind_direction_{WIND_ANGLE}"
     
     drone_names = ['E3','E5','E7']
     for i in range(3):
@@ -554,7 +554,7 @@ if __name__ == '__main__':
 
                 threading.Thread.join() # to wait until both thread are finish or in other words all the drones are done flying
                 #--------------------------- Flying done
-                
+
                 
                 waiting_node[third_drone_id] = 2
         
