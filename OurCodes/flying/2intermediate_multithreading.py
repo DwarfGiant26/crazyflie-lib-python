@@ -42,26 +42,24 @@ bat_volt = [-1,-1,-1] #battery voltage for uri1,uri2,and uri3 respectively
 
 #specify start, intermediate, and destination
 #wind speed option are 6.1, 7.6, 9.7
-WIND_SPEED = 0
-WIND_ANGLE = 'None'
+WIND_SPEED = 1
+WIND_ANGLE = 270
 
-""" 
-#path 1
-start = [(1.65,1.20,0.10),(0.70,0.76,0.40),(1.19,1.12,0.12)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
-intermediate = (1.34,0.46,0.4)
-destination = [(0.68,0.34,1.01),(1.87,-0.16,0.34),(1.29,-0.36,0.94)]
+waiting_time = [[0,0,0,0],[0,0,0,0],[0,0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate 1, = 2 means intermediate 2, =3 means destination.
 travel_dist = [0,0,0]
-waiting_time = [[0,0,0],[0,0,0],[0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate, = 2 means destination.
-path_name = [['A1','B2','F1','F2'],['J1','B2','F1','B1'],['A/E1','B2','F1','C1']] """
+
+#path 1
+start = [(1.65,1.20,0.10),(0.4,0.53,0.83),(1.19,1.12,0.12)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
+intermediate = [(1.34,0.46,0.4),(0.70,0.76,0.75)]
+destination = [(0.68,0.34,1.01),(1.87,-0.16,0.34),(1.29,-0.36,0.94)]
+path_name = [['A1','B2','F1','F2'],['J1','B2','F1','B1'],['A/E1','B2','F1','C1']]
 
 
 """ #path 2
 start = [(0.68,0.34,1.01),(1.87,-0.16,0.34),(1.29,-0.36,0.94)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
-intermediate = (1.34,0.46,0.4)
-destination = [(1.65,1.20,0.10),(0.70,0.76,0.40),(1.19,1.12,0.12)]
-travel_dist = [0,0,0]
-waiting_time = [[0,0,0],[0,0,0],[0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate, = 2 means destination.
-path_name = [['F2','B2','A1'],['B1','B2','F1'],['C1','B2','A/E1']] """
+intermediate = [(1.34,0.46,0.4),(0.70,0.76,0.75)]
+destination = [(1.65,1.20,0.10),(0.4,0.53,0.83),(1.19,1.12,0.12)]
+path_name = [['F2','B2','F1','A1'],['B1','B2','F1','J1'],['C1','B2','F1','A/E1']] """
 
 """ #path 2 not used
 start = [(0.59,1.13,1.08),(1.24,-0.31,0.94),(0.70,-0.74,0.58)] #for scf, scf2, and scf3 / id no 1,2,and 3 / uri1, uri2, and uri3 respectively
@@ -86,7 +84,7 @@ start = [(1.24,-0.31,0.58),(0.70,-0.74,0.10),(1.65,1.20,0.94)] #for scf, scf2, a
 intermediate = [(0.70,0.76,0.75),(0.70,0.76,0.75)]
 destination = [(0.04,0.53,0.12),(1.19,1.12,1.28),(0.59,1.13,0.83)]
 travel_dist = [0,0,0]
-waiting_time = [[0,0,0,0],[0,0,0,0],[0,0,0,0]] #to use: waiting_time[droneid][whichnode]. Note: whichnode = 0 means start, = 1 means intermediate 1, = 2 means intermediate 2, =3 means destination.
+
 path_name = [['C1','F1','J1'],['G1','F1','A/B1'],['A1','F1','E2']] #this is path for e3, e5, and e7 respectively
 # order of flight: e7,e3,e5  """
 
@@ -112,7 +110,7 @@ upper_bat_thresh = 4.15 #battery percentage in which we stop charging cause we c
 hi_relative_height = 0.5 
 #distance from drone to the helipads in the top of the building when the drone is trying to land(has to be a small number so that drone does not bounce)
 lo_relative_height = 0.1
-safety_sleep = 8
+safety_sleep = 10
 first_drone_id = -1 # this is just for declaration
 
 hover_time = 3 #in seconds
@@ -187,7 +185,7 @@ def logconf_callback_1(timestamp, data, logconf):
     
     bat_volt[0] = float(data['pm.vbat'])
     if waiting_node != -1:
-        data['node_name'] = path_name[waiting_node[0]]
+        data['node_name'] = path_name[0][waiting_node[0]]
     else:
         data['node_name'] = 'fly'
     data['wind_speed'] = WIND_SPEED
@@ -208,8 +206,9 @@ def logconf_callback_1(timestamp, data, logconf):
     #waiting time
     if waiting_node[0] != -1: #if it is not currently flying
         waiting_time[0][waiting_node[0]] += SAMPLE_PERIOD_MS
-    a,b,c = waiting_time[0]
-    data['waiting_time'] = f"[{a}|{b}|{c}]" #format -> [waitingTimeInStart|waitingTimeInIntermediate|waitingTimeInDestination] all waiting time is currently in ms
+    
+    data['waiting_time'] = '[' + '|'.join(map(str,waiting_time[0])) + ']' 
+    #format -> [waitingTimeInStart|waitingTimeInIntermediate1|waitingtimeinter2|waitingTimeInDestination] all waiting time is currently in ms
 
     log_history[0].append(data)
     log_cycles += 1
@@ -220,7 +219,7 @@ def logconf_callback_2(timestamp, data, logconf):
     data['time.ms'] = timestamp
     bat_volt[1] = float(data['pm.vbat'])
     if waiting_node != -1:
-        data['node_name'] = path_name[waiting_node[1]]
+        data['node_name'] = path_name[1][waiting_node[1]]
     else:
         data['node_name'] = 'fly'
     data['wind_speed'] = WIND_SPEED
@@ -241,8 +240,8 @@ def logconf_callback_2(timestamp, data, logconf):
     #waiting time
     if waiting_node[1] != -1: #if it is not currently flying
         waiting_time[1][waiting_node[1]] += SAMPLE_PERIOD_MS
-    a,b,c = waiting_time[1]
-    data['waiting_time'] = f"[{a}|{b}|{c}]"
+    
+    data['waiting_time'] = '[' + '|'.join(map(str,waiting_time[1])) + ']' 
 
     log_history[1].append(data)
     log_cycles += 1
@@ -253,7 +252,7 @@ def logconf_callback_3(timestamp, data, logconf):
     data['time.ms'] = timestamp
     bat_volt[2] = float(data['pm.vbat'])
     if waiting_node != -1:
-        data['node_name'] = path_name[waiting_node[2]]
+        data['node_name'] = path_name[2][waiting_node[2]]
     else:
         data['node_name'] = 'fly'
     data['wind_speed'] = WIND_SPEED
@@ -274,8 +273,8 @@ def logconf_callback_3(timestamp, data, logconf):
     #waiting time
     if waiting_node[2] != -1: #if it is not currently flying
         waiting_time[2][waiting_node[2]] += SAMPLE_PERIOD_MS
-    a,b,c = waiting_time[2]
-    data['waiting_time'] = f"[{a}|{b}|{c}]"
+    
+    data['waiting_time'] = '[' + '|'.join(map(str,waiting_time[2])) + ']' 
 
     log_history[2].append(data)
     log_cycles += 1
@@ -308,13 +307,14 @@ def determine_order(intermediates, start, drones):
                 dist.append((distance(start[i],intermediate),drones[i],i))
         #sort based on the distance
         dist.sort()
+        print(dist)
         closest_drone = dist[0][1]
         closest_drone_id = dist[0][2]
         result.append(closest_drone)
         result.append(closest_drone_id)
         undecided_id.remove(closest_drone_id)
     result.append(drones[undecided_id[0]])
-    result.append(undecided_id)
+    result.append(undecided_id[0])
 
     return result
 
@@ -512,8 +512,8 @@ if __name__ == '__main__':
                     first_drone.commander.send_position_setpoint(start[first_drone_id][0], start[first_drone_id][1], start[first_drone_id][2]+hi_relative_height, 0)
                     second_drone.commander.send_position_setpoint(start[second_drone_id][0], start[second_drone_id][1], start[second_drone_id][2]+hi_relative_height, 0)
                     time.sleep(0.1)
-                relative_wind_direction[first_drone_id] = determine_direction(start[first_drone_id],intermediate)
-                relative_wind_direction[second_drone_id] = determine_direction(start[second_drone_id],intermediate) 
+                relative_wind_direction[first_drone_id] = determine_direction(start[first_drone_id],intermediate[0])
+                relative_wind_direction[second_drone_id] = determine_direction(start[second_drone_id],intermediate[1]) 
                 #go
                 for y in range(hover_time):
                     first_drone.commander.send_position_setpoint(intermediate[0][0], intermediate[0][1], intermediate[0][2]+hi_relative_height, 0)
@@ -547,12 +547,19 @@ if __name__ == '__main__':
                         break
                     time.sleep(0.1)
                 
-
+                
                 #1 thread will wait for 1 drone to charge until full, and the other thread will make the other 2 drone fly
-                threading.thread.start_new_thread(wait_for_drone,(drone_b,drone_b_id))
-                threading.thread.start_new_thread(drone_go,(drone_a,drone_a_id,third_drone,third_drone_id))
+                
+                thread1 = threading.Thread(target=wait_for_drone,args=(drone_b,drone_b_id))
+                thread2 = threading.Thread(target=drone_go,args=(drone_a,drone_a_id,third_drone,third_drone_id))
+                thread1.start()
+                thread2.start()
+                
 
-                threading.Thread.join() # to wait until both thread are finish or in other words all the drones are done flying
+                # to wait until both thread are finish or in other words all the drones are done flying
+                from threading import Thread
+                thread1.join() 
+                thread2.join()
                 #--------------------------- Flying done
 
                 
