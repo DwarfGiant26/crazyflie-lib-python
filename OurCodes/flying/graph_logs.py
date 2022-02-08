@@ -3,8 +3,8 @@ import pandas as pd
 import numpy as np
 
 path_no = 2
-speed_no = 0
-angle = 'None'
+speed_no = 2
+angle = 90
 
 time_dataE3 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv", usecols = ['time.ms'])
 volt_dataE3 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv", usecols = ['pm.vbat'])
