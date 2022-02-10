@@ -1,6 +1,8 @@
-data is on folder 1Internediate and 2Intermediate
+data is on folder 1Intermediate and 2Intermediate
 
-column on csv files for 1Intermediate:
+To navigate through the directory, first choose either 1 or 2 intermediate, then choose path number(different path number will have different start,intermediate, or destination point). Then choose the wind speed(The number there is our fan power settings). lastly choose wind_direction(the number here is the global wind direction. Look below for more details on global wind direction).
+
+column on csv files for Intermediate:
 
 1. time.ms -> showing time that has passed in milliseconds
 
@@ -20,11 +22,11 @@ column on csv files for 1Intermediate:
 
 9. drone_id -> showing the id of drone with this csv. Possible drone ids are 0,1,and 2
 
-10. node_name -> don't use
+10. node_name -> don't use the one in 1Intermediate. In 2Intermediate it will either show the name of the node e.g. A1,B2,etc. or it will say "fly" if it is currently not in the ground.
 
-11. wind_speed 
+11. wind_speed -> in km/hours
 
-12. global_wind_direction -> following quadran, so east wind is 0, north wind is 90, west is 180 south is 270
+12. global_wind_direction -> following quadran, so wind going to east is 0, wind going to north is 90, west is 180 south is 270
 
 13. relative_wind_direction -> global wind direction - drone flight path angle.
 drone flight path angle is also following quadran. So if the drone is moving from west to east, the angle will be 0. if the drone is moving from south to north the angle will be 90. and so on
