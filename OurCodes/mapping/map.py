@@ -13,7 +13,7 @@ with open('node_map.csv', newline='') as csvfile:
         edges += [(row['Source'], row['Dest'],
                    {'Dist': float(row['Dist'])})]
 
-with open('BuildingPosition_noblanks.csv', newline='') as csvfile:
+with open('BuildingPosition.csv', newline='') as csvfile:
     reader = csvfile.readlines()
     for rows in reader:
         row = rows.split(',')
