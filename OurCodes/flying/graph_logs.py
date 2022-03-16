@@ -2,32 +2,33 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
 
-path_no = 3
+path_no = 5
 speed_no = 2
 angle = 270
+parent_folder = "/home/alan/drone/Ours/OurCodes/flying"
 
-time_dataE3 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv", usecols = ['time.ms'])
-volt_dataE3 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv", usecols = ['pm.vbat'])
-dist_dataE3 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv", usecols = ['travel_dist'])
-x_E3 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv", usecols = ['stateEstimate.x'])
-y_E3 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv", usecols = ['stateEstimate.y'])
-z_E3 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv", usecols = ['stateEstimate.z'])
+time_dataE3 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv", usecols = ['time.ms'])
+volt_dataE3 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv", usecols = ['pm.vbat'])
+dist_dataE3 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv", usecols = ['travel_dist'])
+x_E3 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv", usecols = ['stateEstimate.x'])
+y_E3 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv", usecols = ['stateEstimate.y'])
+z_E3 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv", usecols = ['stateEstimate.z'])
 
-time_dataE5 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E5.csv", usecols = ['time.ms'])
-volt_dataE5 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E5.csv", usecols = ['pm.vbat'])
-dist_dataE5 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E5.csv", usecols = ['travel_dist'])
-x_E5 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E5.csv", usecols = ['stateEstimate.x'])
-y_E5 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E5.csv", usecols = ['stateEstimate.y'])
-z_E5 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E5.csv", usecols = ['stateEstimate.z'])
+time_dataE5 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E5.csv", usecols = ['time.ms'])
+volt_dataE5 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E5.csv", usecols = ['pm.vbat'])
+dist_dataE5 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E5.csv", usecols = ['travel_dist'])
+x_E5 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E5.csv", usecols = ['stateEstimate.x'])
+y_E5 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E5.csv", usecols = ['stateEstimate.y'])
+z_E5 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E5.csv", usecols = ['stateEstimate.z'])
 
 
-time_dataE7 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E7.csv", usecols = ['time.ms'])
-volt_dataE7 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E7.csv", usecols = ['pm.vbat'])
-dist_dataE7 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E7.csv", usecols = ['travel_dist'])
-rel_dataE7 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E7.csv", usecols = ['relative_wind_direction'])
-x_E7 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E7.csv", usecols = ['stateEstimate.x'])
-y_E7 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E7.csv", usecols = ['stateEstimate.y'])
-z_E7 = pd.read_csv(f"/home/alan/drone/Ours/OurCodes/flying/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E7.csv", usecols = ['stateEstimate.z'])
+time_dataE7 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E7.csv", usecols = ['time.ms'])
+volt_dataE7 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E7.csv", usecols = ['pm.vbat'])
+dist_dataE7 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E7.csv", usecols = ['travel_dist'])
+rel_dataE7 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E7.csv", usecols = ['relative_wind_direction'])
+x_E7 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E7.csv", usecols = ['stateEstimate.x'])
+y_E7 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E7.csv", usecols = ['stateEstimate.y'])
+z_E7 = pd.read_csv(f"{parent_folder}/2Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E7.csv", usecols = ['stateEstimate.z'])
 
 
 # LINE OF BEST FIT
