@@ -11,10 +11,11 @@ speed_no = 1
 angle = 90
 
 parent_folder = "/Users/sarahbradley/Documents/SCSLab/crazyflie-lib-python/OurCodes/flying"
+parent_folder = "/home/alan/drone/Ours/OurCodes/flying"
 
-dataE3 = pd.read_csv(f"{parent_folder}/New_1Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv")
-dataE5 = pd.read_csv(f"{parent_folder}/New_1Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E5.csv")
-dataE7 = pd.read_csv(f"{parent_folder}/New_1Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E7.csv")
+dataE3 = pd.read_csv(f"{parent_folder}/new_1Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E3.csv")
+dataE5 = pd.read_csv(f"{parent_folder}/new_1Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E5.csv")
+dataE7 = pd.read_csv(f"{parent_folder}/new_1Intermediate/path_{path_no}/wind_speed_{speed_no}/wind_direction_{angle}/drone_E7.csv")
 
 # ---------------------------------------------------------------------------
 # ------------------------------CHARGING OVER TIME---------------------------
