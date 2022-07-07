@@ -1,4 +1,4 @@
-data is on folder 1Intermediate and 2Intermediate
+data is on folder cleaned_1Intermediate and cleaned_2Intermediate
 
 To navigate through the directory, first choose either 1 or 2 intermediate, then choose path number(different path number will have different start,intermediate, or destination point). Then choose the wind speed(The number there is our fan power settings). lastly choose wind_direction(the number here is the global wind direction. Look below for more details on global wind direction).
 
